@@ -34,3 +34,16 @@ test("withVote adds one vote once", () => {
   const v = withVote(withVote(view([a]), a.id), a.id);
   expect(v.questions[0]).toMatchObject({ votes: 2, voted: true });
 });
+
+import { projectorSize } from "./select";
+
+test("projectorSize thresholds by runes", () => {
+  expect(projectorSize("a".repeat(89))).toBe("xl");
+  expect(projectorSize("a".repeat(90))).toBe("xl");
+  expect(projectorSize("a".repeat(91))).toBe("l");
+  expect(projectorSize("a".repeat(180))).toBe("l");
+  expect(projectorSize("a".repeat(181))).toBe("m");
+  // 90 runes of uzbek text is far more than 90 utf-16 units / bytes
+  expect(projectorSize("oʻ".repeat(45))).toBe("xl");
+  expect(projectorSize("😀".repeat(90))).toBe("xl");
+});

@@ -1,0 +1,83 @@
+/* projector: read from the back of the room, always light */
+.projector {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+body.is-projector .projector { display: flex; }
+
+/* with a highlight: the zar band is the room's focus */
+.pj-on { flex-direction: column; }
+.pj-band {
+  flex: 1 1 70%;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: 5vh 6vw;
+  background: var(--zar);
+  color: #16203A;
+}
+.pj-label { margin: 0 0 2vh; font-size: clamp(1rem, 1.6vw, 1.75rem); font-weight: 600; }
+.pj-text {
+  max-width: 24em; /* in the text's own size: long lines stay readable */
+  margin: 0;
+  font-weight: 600;
+  line-height: var(--lh-display);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.pj-xl { font-size: clamp(2.5rem, 5.5vw, 6rem); }
+.pj-l { font-size: clamp(2rem, 4.2vw, 4.5rem); }
+.pj-m { font-size: clamp(1.75rem, 3.2vw, 3.5rem); }
+.pj-meta { margin: 2.5vh 0 0; font-size: clamp(1rem, 1.6vw, 1.75rem); }
+
+.pj-strip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4vw;
+  padding: 3vh 6vw;
+}
+.pj-next { flex: 1; min-width: 0; }
+.pj-next-label { margin: 0 0 1vh; font-size: clamp(.9rem, 1.2vw, 1.4rem); font-weight: 600; color: var(--muted); }
+.pj-next ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1vh; }
+.pj-next li { display: flex; gap: 1.2vw; align-items: baseline; font-size: clamp(1rem, 1.5vw, 1.8rem); }
+.pj-next-votes { min-width: 2ch; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pj-next-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pj-join { display: flex; align-items: center; gap: 1.5vw; }
+.pj-qr { width: 160px; height: 160px; image-rendering: pixelated; }
+.pj-url-small { margin: 0; font-size: clamp(1rem, 1.5vw, 1.8rem); font-weight: 600; }
+
+/* nothing highlighted: a full-screen invitation */
+.pj-invite {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  padding: 4vh 6vw;
+  text-align: center;
+}
+.pj-title { margin: 0; font-size: clamp(1.25rem, 2vw, 2.25rem); color: var(--muted); }
+.pj-headline { margin: 0; font-size: clamp(2.5rem, 5.5vw, 6rem); line-height: var(--lh-display); font-weight: 600; }
+.pj-qr-big { width: 40vh; height: 40vh; image-rendering: pixelated; }
+.pj-scan { margin: 0; font-size: clamp(1rem, 1.6vw, 1.75rem); color: var(--muted); }
+.pj-url { margin: 0; font-size: clamp(1.75rem, 3.2vw, 3.5rem); font-weight: 600; overflow-wrap: anywhere; }
+
+/* visible only to the presenter's mouse or keyboard, never to the room */
+.pj-exit {
+  position: fixed; top: 16px; right: 16px;
+  min-height: 40px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  opacity: 0;
+}
+.pj-exit:hover, .pj-exit:focus-visible { opacity: 1; }
+
+/* the page's one orchestrated motion: a new highlight rises in */
+@media (prefers-reduced-motion: no-preference) {
+  .pj-now { animation: pj-in 280ms ease-out; }
+  @keyframes pj-in { from { opacity: 0; transform: translateY(12px); } }
+}

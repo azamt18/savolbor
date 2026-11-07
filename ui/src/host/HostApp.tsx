@@ -9,6 +9,7 @@ import { LangToggle } from "../LangToggle";
 import { Queue, type HostTab } from "./Queue";
 import { NowPanel } from "./NowPanel";
 import { useShortcuts } from "./useShortcuts";
+import { Projector } from "./Projector";
 
 function lists(questions: QuestionView[]): Record<HostTab, QuestionView[]> {
   return {
@@ -109,6 +110,7 @@ export function HostApp() {
       </main>
 
       <footer className="hfoot">{t("shortcuts")}</footer>
+      {projector && view && <Projector view={view} onExit={() => setProjector(false)} />}
     </div>
   );
 }

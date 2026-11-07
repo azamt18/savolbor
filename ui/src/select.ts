@@ -37,3 +37,10 @@ export function withVote(v: View, id: string): View {
 export function highlightedQuestion(v: View): QuestionView | undefined {
   return v.highlighted ? v.questions.find((q) => q.id === v.highlighted && !q.hidden) : undefined;
 }
+
+// projectorSize steps the projector's type down as questions get longer, so
+// a 280-character question still fits above the fold at 1280×720.
+export function projectorSize(text: string): "xl" | "l" | "m" {
+  const n = [...text].length;
+  return n <= 90 ? "xl" : n <= 180 ? "l" : "m";
+}

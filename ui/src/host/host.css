@@ -121,4 +121,4 @@ li[aria-current="true"] .hvotes { background: var(--line); }
 .hfoot { padding: 12px 24px; font-size: var(--fs-s); color: var(--muted); border-top: 1px solid var(--line); }
 
 /* projector mode hides the presenter ui; the projector view itself is in projector.css */
-body.is-projector .host { display: none; }
+body.is-projector .host > :not(.projector) { display: none; }
