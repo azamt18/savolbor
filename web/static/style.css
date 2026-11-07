@@ -176,6 +176,12 @@ body.projector .projector-view {
 .pj-join img { width: 100%; max-width: 28vw; image-rendering: pixelated; background: #fff; padding: 1vw; border-radius: var(--radius-tile); }
 .pj-join p { margin: .75vw 0 0; font-size: clamp(.9rem, 1.3vw, 1.5rem); color: var(--ink-soft); }
 .pj-join .url { font-size: clamp(1.2rem, 2.2vw, 2.6rem); font-weight: 800; color: var(--ink); overflow-wrap: anywhere; }
+body.projector .projector-view.pj-empty { grid-template-columns: 1fr; place-items: center; }
+.pj-empty > div:first-child { display: none; }
+.pj-empty .pj-join { position: static; align-self: center; }
+.pj-empty .pj-join img { width: min(62vh, 80vw); max-width: none; padding: 1.5vh; }
+.pj-empty .pj-join p { font-size: clamp(1rem, 2.4vh, 2rem); }
+.pj-empty .pj-join .url { font-size: clamp(1.5rem, 5vh, 4rem); }
 .pj-exit {
   position: fixed; right: 1rem; bottom: 1rem; opacity: 0; min-height: 44px; padding: 0 1rem;
   border: 1.5px solid var(--line); border-radius: var(--radius-field); background: var(--surface);

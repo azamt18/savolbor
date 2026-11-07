@@ -98,6 +98,8 @@
     $("pjTop").replaceChildren(...top.map((q) =>
       h("li", { class: "q" }, votes(q), h("div", { class: "q-body" }, h("p", { class: "text", text: q.text })))));
     $("pjUrl").textContent = view.joinUrl || location.origin;
+    // nothing to show yet: let the qr code take the whole screen
+    document.querySelector(".projector-view").classList.toggle("pj-empty", !now && top.length === 0);
   }
 
   function connect() {
