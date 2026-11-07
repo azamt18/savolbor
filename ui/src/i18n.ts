@@ -11,7 +11,7 @@ const uz = {
   send: "Yuborish",
   sent: "Yuborildi",
   charsLeft: "{n} belgi qoldi",
-  top: "Koʻp ovoz",
+  top: "Top savollar",
   newest: "Yangi",
   mine: "Meniki",
   you: "siz",

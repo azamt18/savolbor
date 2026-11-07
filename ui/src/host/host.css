@@ -58,7 +58,6 @@ li[aria-current="true"] .hvotes { background: var(--line); }
 
 .now-text { font-size: var(--fs-xl); line-height: var(--lh-display); font-weight: 600; }
 .now-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; }
-.next-up { flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: var(--fs-s); }
 
 .hfoot { padding: 12px 24px; font-size: var(--fs-s); color: var(--muted); border-top: 1px solid var(--line); }
 

@@ -34,7 +34,6 @@ export function NowPanel({ current, top, now, onNext, onHide, onClear }: Props) 
           {top && (
             <div className="now-actions">
               <button type="button" className="btn primary" onClick={onNext}>{t("answerNow")}</button>
-              <span className="next-up">{top.text}</span>
             </div>
           )}
         </>
