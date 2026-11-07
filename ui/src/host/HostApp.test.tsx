@@ -153,8 +153,10 @@ test("top-bar actions carry an icon next to their label, hidden from screen read
   expect(screen.getByRole("banner").querySelector(".logo svg")).not.toBeNull();
 });
 
-test("connected count is styled as the live-room signal", () => {
+test("connected count is a green dot with the count", () => {
   mockBoard(view([a], { connected: 3 }));
   render(<HostApp />);
-  expect(screen.getByText("3 connected").closest(".live")!.classList.contains("has-count")).toBe(true);
+  const live = screen.getByText("3 connected").closest(".live")!;
+  expect(live.querySelector(".dot")).not.toBeNull();
+  expect(live.querySelector("svg")).toBeNull();
 });

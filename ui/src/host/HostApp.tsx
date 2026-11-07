@@ -6,7 +6,7 @@ import { highlightedQuestion, newest, ranked } from "../select";
 import { useNow } from "../useNow";
 import { MAX_TITLE } from "../format";
 import { LangToggle } from "../LangToggle";
-import { DownloadIcon, LogoIcon, PersonIcon, ScreenIcon } from "../icons";
+import { DownloadIcon, LogoIcon, ScreenIcon } from "../icons";
 import { Queue, type HostTab } from "./Queue";
 import { NowPanel } from "./NowPanel";
 import { useShortcuts } from "./useShortcuts";
@@ -75,12 +75,9 @@ export function HostApp() {
         <span className="logo"><LogoIcon /></span>
         <span className="brand">{t("title")}</span>
         <TitleInput value={view?.title ?? ""} onSave={(title) => run(() => api.title(title))} />
-        <span className={"live" + (status === "offline" ? " is-off" : " has-count")} role="status">
-          {status === "offline" ? (
-            <><span className="dot" aria-hidden="true" />{t("offline")}</>
-          ) : (
-            <><PersonIcon />{t("connected", { n: view?.connected ?? 0 })}</>
-          )}
+        <span className={"live" + (status === "offline" ? " is-off" : "")} role="status">
+          <span className="dot" aria-hidden="true" />
+          {status === "offline" ? t("offline") : t("connected", { n: view?.connected ?? 0 })}
         </span>
         <a className="btn" href="/api/host/export.md" download title={t("exportHint")}><DownloadIcon />{t("export")}</a>
         <button type="button" className="btn" onClick={() => setProjector(true)}>

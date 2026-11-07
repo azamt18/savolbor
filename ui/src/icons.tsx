@@ -20,12 +20,6 @@ export const LogoIcon = () => (
     <path d="M8.6 7.3a1.5 1.5 0 1 1 2.2 1.3c-.5.3-.8.6-.8 1.2M10 11.6v.01" />
   </svg>
 );
-export const PersonIcon = () => (
-  <svg {...line}>
-    <circle cx="10" cy="6.5" r="3" />
-    <path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" />
-  </svg>
-);
 export const DownloadIcon = () => (
   <svg {...line}><path d="M10 3v9M6.5 8.5L10 12l3.5-3.5M4 15.5h12" /></svg>
 );

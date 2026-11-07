@@ -66,8 +66,6 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 .live svg { flex: none; }
-/* the room is here: the green the dot used to have, darkened to pass aa as text */
-.live.has-count { color: var(--firuza-deep); }
 .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--firuza); }
 .live.is-off .dot { background: var(--muted); }
 

@@ -4,17 +4,17 @@ import { setLang } from "./i18n";
 
 beforeEach(() => setLang("uz"));
 
-test("each language button carries its flag next to the code; no globe", () => {
-  const { container } = render(<LangToggle />);
-  for (const code of ["uz", "en"]) {
-    const btn = screen.getByRole("button", { name: code });
+test("each language button is just its flag, named for screen readers", () => {
+  render(<LangToggle />);
+  for (const name of ["Oʻzbekcha", "English"]) {
+    const btn = screen.getByRole("button", { name });
     expect(btn.querySelector("svg.flag[aria-hidden='true']")).not.toBeNull();
+    expect(btn.textContent).toBe("");
   }
-  expect(container.querySelector(".lang-globe")).toBeNull();
 });
 
 test("clicking a flag button switches the language", () => {
   render(<LangToggle />);
-  fireEvent.click(screen.getByRole("button", { name: "en" }));
-  expect(screen.getByRole("button", { name: "en" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "English" }));
+  expect(screen.getByRole("button", { name: "English" }).getAttribute("aria-pressed")).toBe("true");
 });
