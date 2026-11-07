@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/skip2/go-qrcode"
@@ -20,26 +21,28 @@ const maxBody = 8 << 10
 type Config struct {
 	Board    *qna.Board
 	AdminKey string
-	JoinURL  string
+	JoinURL  string           // initial value; see SetJoinURL
 	Static   fs.FS            // web.Static sub-tree "static"
 	Now      func() time.Time // export date; defaults to time.Now
 }
 
-type server struct {
+type Server struct {
 	Config
-	qr []byte
+	handler http.Handler
+
+	mu      sync.RWMutex
+	joinURL string
+	qr      []byte
+	// joinSubs get a signal when the join url changes, like board subscribers
+	joinSubs map[chan struct{}]struct{}
 }
 
-func New(cfg Config) http.Handler {
+func New(cfg Config) *Server {
 	if cfg.Now == nil {
 		cfg.Now = time.Now
 	}
-	s := &server{Config: cfg}
-	if png, err := qrcode.Encode(cfg.JoinURL, qrcode.Medium, 512); err == nil {
-		s.qr = png
-	} else {
-		slog.Warn("qr code", "err", err)
-	}
+	s := &Server{Config: cfg, joinSubs: map[chan struct{}]struct{}{}}
+	s.SetJoinURL(cfg.JoinURL)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.page("index.html"))
@@ -63,17 +66,56 @@ func New(cfg Config) http.Handler {
 	cop.SetDenyHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusForbidden, "forbidden")
 	}))
-	return cop.Handler(withDevice(mux))
+	s.handler = cop.Handler(withDevice(mux))
+	return s
 }
 
-func (s *server) page(name string) http.HandlerFunc {
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.handler.ServeHTTP(w, r) }
+
+// SetJoinURL changes the participant url (the laptop moved networks): the qr
+// code is regenerated and every open stream gets a fresh snapshot.
+func (s *Server) SetJoinURL(url string) {
+	png, err := qrcode.Encode(url, qrcode.Medium, 512)
+	if err != nil {
+		slog.Warn("qr code", "url", url, "err", err)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.joinURL, s.qr = url, png
+	for ch := range s.joinSubs {
+		select {
+		case ch <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func (s *Server) join() (string, []byte) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.joinURL, s.qr
+}
+
+func (s *Server) subscribeJoin() (<-chan struct{}, func()) {
+	ch := make(chan struct{}, 1)
+	s.mu.Lock()
+	s.joinSubs[ch] = struct{}{}
+	s.mu.Unlock()
+	return ch, func() {
+		s.mu.Lock()
+		delete(s.joinSubs, ch)
+		s.mu.Unlock()
+	}
+}
+
+func (s *Server) page(name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache")
 		http.ServeFileFS(w, r, s.Static, name)
 	}
 }
 
-func (s *server) hostPage(w http.ResponseWriter, r *http.Request) {
+func (s *Server) hostPage(w http.ResponseWriter, r *http.Request) {
 	if !IsHost(r, s.AdminKey) {
 		writeErr(w, http.StatusForbidden, "forbidden")
 		return
@@ -86,7 +128,7 @@ func (s *server) hostPage(w http.ResponseWriter, r *http.Request) {
 	s.page("host.html")(w, r)
 }
 
-func (s *server) host(next http.HandlerFunc) http.HandlerFunc {
+func (s *Server) host(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsHost(r, s.AdminKey) {
 			writeErr(w, http.StatusForbidden, "forbidden")
@@ -96,16 +138,18 @@ func (s *server) host(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (s *server) qrPNG(w http.ResponseWriter, r *http.Request) {
-	if s.qr == nil {
+func (s *Server) qrPNG(w http.ResponseWriter, r *http.Request) {
+	_, png := s.join()
+	if png == nil {
 		writeErr(w, http.StatusInternalServerError, "internal")
 		return
 	}
 	w.Header().Set("Content-Type", "image/png")
-	w.Write(s.qr)
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Write(png)
 }
 
-func (s *server) post(w http.ResponseWriter, r *http.Request) {
+func (s *Server) post(w http.ResponseWriter, r *http.Request) {
 	var body struct{ Text, Name string }
 	if !decode(w, r, &body) {
 		return
@@ -118,7 +162,7 @@ func (s *server) post(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 
-func (s *server) edit(w http.ResponseWriter, r *http.Request) {
+func (s *Server) edit(w http.ResponseWriter, r *http.Request) {
 	var body struct{ Text string }
 	if !decode(w, r, &body) {
 		return
@@ -126,15 +170,15 @@ func (s *server) edit(w http.ResponseWriter, r *http.Request) {
 	reply(w, s.Board.Edit(DeviceID(r), r.PathValue("id"), body.Text))
 }
 
-func (s *server) delete(w http.ResponseWriter, r *http.Request) {
+func (s *Server) delete(w http.ResponseWriter, r *http.Request) {
 	reply(w, s.Board.Delete(DeviceID(r), r.PathValue("id")))
 }
 
-func (s *server) vote(w http.ResponseWriter, r *http.Request) {
+func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
 	reply(w, s.Board.Vote(DeviceID(r), r.PathValue("id")))
 }
 
-func (s *server) toggle(set func(id string, on bool) error) http.HandlerFunc {
+func (s *Server) toggle(set func(id string, on bool) error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body struct{ On bool }
 		if !decode(w, r, &body) {
@@ -144,7 +188,7 @@ func (s *server) toggle(set func(id string, on bool) error) http.HandlerFunc {
 	}
 }
 
-func (s *server) highlight(w http.ResponseWriter, r *http.Request) {
+func (s *Server) highlight(w http.ResponseWriter, r *http.Request) {
 	var body struct{ ID string }
 	if !decode(w, r, &body) {
 		return
@@ -152,7 +196,7 @@ func (s *server) highlight(w http.ResponseWriter, r *http.Request) {
 	reply(w, s.Board.Highlight(body.ID))
 }
 
-func (s *server) export(w http.ResponseWriter, r *http.Request) {
+func (s *Server) export(w http.ResponseWriter, r *http.Request) {
 	now := s.Now()
 	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="savolbor-%s.md"`, now.Format("2006-01-02")))

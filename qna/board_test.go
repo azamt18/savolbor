@@ -43,7 +43,7 @@ func (h *harness) post(t *testing.T, device, text string) string {
 
 func TestPostAcceptsUzbek280Runes(t *testing.T) {
 	h := newHarness()
-	unit := "oʻgʻş😀" // 6 runes, 15 bytes
+	unit := "oʻgʻş😀"                               // 6 runes, 15 bytes
 	text := strings.Repeat(unit, 46) + "salom"[:4] // 276 + 4 = 280 runes
 	if n := utf8.RuneCountInString(text); n != 280 || len(text) <= 280 {
 		t.Fatalf("fixture: %d runes, %d bytes", n, len(text))

@@ -18,7 +18,7 @@ const adminKey = "secretkey"
 
 type env struct {
 	board *qna.Board
-	h     http.Handler
+	h     *Server
 	clock time.Time
 }
 

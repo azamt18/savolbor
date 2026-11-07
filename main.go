@@ -73,7 +73,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	var handler http.Handler = server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static})
+	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static})
+	var handler http.Handler = app
 	if *debug {
 		handler = logRequests(handler)
 	}
@@ -100,6 +101,14 @@ func run() error {
 		fmt.Println("  debug: logging every request. no log line when a phone connects = it never reached this laptop")
 		fmt.Println()
 	}
+
+	go watchJoinURL(base, 5*time.Second, joinURL, func() string { return joinURLFor(*port) }, func(u string) {
+		app.SetJoinURL(u)
+		fmt.Printf("\nnetwork changed — participants now join at %s\n  presenter (phone): %s/host?key=%s\n\n", u, u, adminKey)
+		if qr, err := qrcode.New(u, qrcode.Medium); err == nil {
+			fmt.Println(qr.ToSmallString(false))
+		}
+	})
 
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
