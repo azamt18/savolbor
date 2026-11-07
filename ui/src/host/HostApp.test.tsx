@@ -152,3 +152,9 @@ test("top-bar actions carry an icon next to their label, hidden from screen read
   expect(screen.getByRole("group", { name: /til/ }).querySelector("svg")).not.toBeNull();
   expect(screen.getByRole("banner").querySelector(".logo svg")).not.toBeNull();
 });
+
+test("connected count is styled as the live-room signal", () => {
+  mockBoard(view([a], { connected: 3 }));
+  render(<HostApp />);
+  expect(screen.getByText("3 connected").closest(".live")!.classList.contains("has-count")).toBe(true);
+});

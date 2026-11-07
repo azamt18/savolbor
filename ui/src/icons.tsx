@@ -20,12 +20,6 @@ export const LogoIcon = () => (
     <path d="M8.6 7.3a1.5 1.5 0 1 1 2.2 1.3c-.5.3-.8.6-.8 1.2M10 11.6v.01" />
   </svg>
 );
-export const GlobeIcon = () => (
-  <svg {...line}>
-    <circle cx="10" cy="10" r="7.5" />
-    <path d="M2.5 10h15M10 2.5c2 2 3 4.5 3 7.5s-1 5.5-3 7.5c-2-2-3-4.5-3-7.5s1-5.5 3-7.5z" />
-  </svg>
-);
 export const PersonIcon = () => (
   <svg {...line}>
     <circle cx="10" cy="6.5" r="3" />
@@ -46,4 +40,27 @@ export const CheckIcon = () => (
 );
 export const ExpandIcon = () => (
   <svg {...line}><path d="M12 3.5h4.5V8M16.5 3.5l-5 5M8 16.5H3.5V12M3.5 16.5l5-5" /></svg>
+);
+
+// flags are drawn, not emoji: windows has no flag emoji
+const flag = { width: 20, height: 14, viewBox: "0 0 20 14", "aria-hidden": true, focusable: false, className: "flag" } as const;
+
+export const FlagUz = () => (
+  <svg {...flag}>
+    <rect width="20" height="14" fill="#1EB53A" />
+    <rect width="20" height="4" fill="#0099B5" />
+    <rect y="4" width="20" height="6" fill="#CE1126" />
+    <rect y="4.5" width="20" height="5" fill="#fff" />
+    <circle cx="4" cy="2" r="1.3" fill="#fff" />
+    <circle cx="4.5" cy="2" r="1.1" fill="#0099B5" />
+  </svg>
+);
+export const FlagGb = () => (
+  <svg {...flag}>
+    <rect width="20" height="14" fill="#012169" />
+    <path d="M0 0L20 14M20 0L0 14" stroke="#fff" strokeWidth="2.6" />
+    <path d="M0 0L20 14M20 0L0 14" stroke="#C8102E" strokeWidth="1" />
+    <path d="M10 0v14M0 7h20" stroke="#fff" strokeWidth="4.4" />
+    <path d="M10 0v14M0 7h20" stroke="#C8102E" strokeWidth="2.4" />
+  </svg>
 );

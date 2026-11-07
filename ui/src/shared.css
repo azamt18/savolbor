@@ -50,8 +50,8 @@ kbd {
 
 /* language toggle: two buttons joined into one control */
 .lang { display: inline-flex; align-items: center; }
-.lang-globe { display: inline-grid; place-items: center; margin-right: 6px; color: var(--muted); }
-.lang .btn { min-width: var(--tap); padding: 0 10px; border-radius: 0; color: var(--muted); }
+.flag { border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .12); }
+.lang .btn { min-width: var(--tap); padding: 0 10px; gap: 6px; border-radius: 0; color: var(--muted); }
 .lang .btn:first-child { border-radius: 8px 0 0 8px; }
 .lang .btn:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
 .lang .btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); font-weight: 600; }
@@ -66,6 +66,8 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 .live svg { flex: none; }
+/* the room is here: the green the dot used to have, darkened to pass aa as text */
+.live.has-count { color: var(--firuza-deep); }
 .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--firuza); }
 .live.is-off .dot { background: var(--muted); }
 

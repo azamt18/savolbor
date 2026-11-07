@@ -75,7 +75,7 @@ export function HostApp() {
         <span className="logo"><LogoIcon /></span>
         <span className="brand">{t("title")}</span>
         <TitleInput value={view?.title ?? ""} onSave={(title) => run(() => api.title(title))} />
-        <span className={"live" + (status === "offline" ? " is-off" : "")} role="status">
+        <span className={"live" + (status === "offline" ? " is-off" : " has-count")} role="status">
           {status === "offline" ? (
             <><span className="dot" aria-hidden="true" />{t("offline")}</>
           ) : (

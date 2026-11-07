@@ -93,6 +93,7 @@ cloudflared tunnel --url http://localhost:8080      # prints https://<random>.tr
 ```bash
 make test                    # go test -race, go vet, ui tests (vitest)
 go run . -debug              # api + embedded pages on :8080
+make seed                   # sample questions in a throwaway log on :8099, to look at the ui
 npm --prefix ui run dev      # live-reloading pages on :5173, api proxied to :8080
 ```
 
