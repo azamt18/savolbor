@@ -138,8 +138,8 @@ test("join qr shows under the now panel", () => {
   render(<HostApp />);
   const img = screen.getByRole("img", { name: /QR 192\.168\.1\.23:8080/ });
   expect(img.getAttribute("src")).toBe("/qr.png?u=" + encodeURIComponent("http://192.168.1.23:8080"));
-  // just the code: no address or caption next to it
-  // (the address exists only inside the print-only card)
-  expect(screen.getByText("192.168.1.23:8080").closest(".print-card")).not.toBeNull();
-  expect(img.closest(".join-card")!.textContent).toBe("");
+  // a button that enlarges it, with the short address under it
+  const card = img.closest(".join-card")!;
+  expect(card.tagName).toBe("BUTTON");
+  expect(card.textContent).toBe("192.168.1.23:8080");
 });
