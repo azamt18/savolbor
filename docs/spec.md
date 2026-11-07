@@ -52,13 +52,14 @@ decided after reviewing screenshots of the first ui ("works, but looks like a de
 | area | decision |
 |---|---|
 | ui stack | react + typescript + vite in `ui/`, built into `web/dist` and embedded; `web/dist` committed so `go build` works without node |
-| theme | light-first; phones follow the system setting (dark available); projector always light |
+| theme | light only on every page (dark mode on phones dropped 2026-11-07, task 8: phone and host must look like one app) |
 | palette | paper `#F7F8FA`, ink `#16203A`, lojuvard `#2448A8` (primary), firuza `#0E9F8E` (votes), zar `#E2A43B` ("now answering" only), muted `#6B7489` |
 | type | onest 400/600 embedded (ofl), system fallback |
 | signature moment | "now answering" fills the projector on a zar band; the only orchestrated motion |
 | phone | sticky bottom composer, name behind "add your name", vote pill on the right, tabs top / new / mine, own questions behind a `⋯` menu, answered collapsed |
 | presenter | two columns: queue / answered / hidden tabs + now-answering panel; **done, next** (answer current + highlight next top) ; keyboard shortcuts j/k/enter/n/x/p |
 | projector | highlighted question large with size steps by length, small next strip + qr; empty → full-screen qr invite |
+| consistency (task 8) | one `shared.css` for bar, buttons, tabs, rows, vote, now card; every control 44px tall, primary differs by colour only; 24h times regardless of browser locale; export button reads "Savollarni yuklab olish" / "Download questions" |
 | new features | session title (presenter-set, shown on phones and projector), connected count on `/host`, "mine" tab, public mode polls from the start (no sse through quick tunnels) |
 
 ## out of scope (v1)

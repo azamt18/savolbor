@@ -386,5 +386,5 @@ added in the implementation session after tasks 1–7, each with its own commit 
 
 - real-phone qr scan in an actual room.
 - merge decision for `feat/savolbor`.
-- ui redesign — done 2026-11-07 per [plan-redesign.md](plan-redesign.md); the vanilla `web/static` pages are gone.
+- ui redesign — done 2026-11-07 per [plan-redesign.md](plan-redesign.md); the vanilla `web/static` pages are gone. follow-up **task 8** (align participant ui with host, one button size, export label, 24h times) is open in the same plan.
 

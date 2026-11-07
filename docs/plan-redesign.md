@@ -271,6 +271,42 @@ products/savolbor/
 
 ---
 
+### Task 8: align participant ui with host (added 2026-11-07, after review)
+
+**why:** task 4 specified behaviour, not a shared look. real use showed the phone page reads as a different app: dark navy on phones vs always-light `/host`, pill buttons vs 8px buttons, segmented tabs vs underlined tabs, css duplicated between `participant.css` and `host.css`. buttons on `/host` also differ in height (40 / 52 / lang toggle ~42 / title input 44), and "Markdown yuklab olish" means nothing to a presenter.
+
+**decisions:**
+- **light only, everywhere.** drop the `prefers-color-scheme: dark` block from `tokens.css` and the dark overrides in `participant.css`. one look on phone, laptop and projector. (chosen as the default; revisit only if users ask for dark.)
+- **one control height: 44px (`--tap`)** for every button, input, tab and the lang toggle, on both pages. primary vs secondary differ by colour and weight, never by size. remove `.hbtn.big`.
+- **export label:** uz "Savollarni yuklab olish", en "Download questions"; `title` attribute says the file is markdown (`.md`) for those who care.
+- **times:** 24-hour `HH:MM`, independent of the browser locale (no more "07:23 PM" next to "59 daq oldin").
+
+**Files:**
+- Create: `ui/src/shared.css` — top bar, `.btn` (+ `primary`, `quiet`, `danger`), underlined `.tabs`, `.live`, `.lang`, question row (`.q-text`, `.meta`), vote control, now card (zar top edge), `.error`
+- Modify: `ui/src/tokens.css` (remove dark block), `ui/src/participant/participant.css` and `ui/src/host/host.css` (keep only page layout; delete duplicated rules), `participant/*.tsx` and `host/*.tsx` (class names), `ui/src/format.ts` (`ago` → 24h), `ui/src/i18n.ts` (`export` strings), `participant/Composer.tsx`
+- Test: `ui/src/format.test.ts`, `ui/src/i18n.test.ts`, `participant/App.test.tsx`, `host/HostApp.test.tsx`
+
+**participant page, target look:**
+- white top bar with bottom border, like `/host`. session title is the heading (`--fs-m`, 600); "Savol bor" small and muted after it, or alone when no title is set.
+- tabs: underlined, same as the host queue tabs.
+- question row: same row as the host queue (text, meta under it), vote control on the right — square 8px-radius tile, 44×44 min, count + arrow; voted = firuza fill with dark text.
+- now card: white card with the 6px zar top edge, same as the host's now panel; vote control on the right.
+- composer: textarea grows 1 → 3 rows only while it has text (not on focus); the name is a small chip ("+ ism" / the saved name) inside the composer row, left of the send button, tapping it opens an inline input. no second, offset row. `autocomplete="off"` and `data-1p-ignore`, `data-lpignore="true"`, `data-bwignore` on the textarea so password-manager buttons stay out of it.
+
+- [ ] **Step 1: write failing tests:**
+  - `ago uses 24h clock` — a question 2h old renders `19:23`, not `07:23 PM`, for both `uz` and `en`, with the test forcing `navigator.language = "en-US"`.
+  - `export label is understandable` — `dict.uz.export === "Savollarni yuklab olish"`, `dict.en.export === "Download questions"`; i18n key parity still passes.
+  - `host controls share one size class` — every button in the host top bar and now panel has class `btn` and none has `big`.
+  - `composer stays one row when empty` — focus without typing keeps `rows=1`; typing 3 lines gives `rows=3`.
+  - `name chip` — tapping the chip shows the name input; a saved name shows on the chip after reload (storage).
+- [ ] **Step 2: run** `cd ui && npm test` → FAIL.
+- [ ] **Step 3: implement** — `shared.css` first, then delete the duplicated rules from both page css files, then component class changes, then composer.
+- [ ] **Step 4: run** `make test` → PASS; `grep -n "prefers-color-scheme" ui/src` → nothing; each selector in `shared.css` appears in no other css file.
+- [ ] **Step 5: visual check** — phone at 390×844 with the os in **dark** mode (must still render light), `/host` at 1280×800: top bars match, buttons line up at one height, now card looks the same on both, no am/pm anywhere.
+- [ ] **Step 6: commit** — `feat(savolbor): align participant ui with host`.
+
+---
+
 ## as built
 
 decisions taken during execution that differ from the text above:
