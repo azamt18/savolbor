@@ -92,7 +92,7 @@ body.is-projector .projector { display: flex; }
 }
 .pj-controls button:hover { background: #26304A; }
 .pj-controls button.primary { background: var(--lojuvard); color: #fff; font-weight: 600; }
-.pj-controls kbd { border-color: #4A5578; color: #C9D0E0; }
+.pj-key { border-color: #4A5578; color: #C9D0E0; }
 @media (prefers-reduced-motion: no-preference) {
   .pj-controls { transition: opacity .2s; }
 }

@@ -80,13 +80,45 @@ test("send clears textarea and keeps name", async () => {
   render(<Composer onSend={send} />);
   fireEvent.click(screen.getByRole("button", { name: /add your name/i }));
   fireEvent.change(screen.getByPlaceholderText(/your name/i), { target: { value: "Dilnoza" } });
+  fireEvent.keyDown(screen.getByPlaceholderText(/your name/i), { key: "Enter" });
   const box = screen.getByPlaceholderText(/type your question/i) as HTMLTextAreaElement;
   fireEvent.change(box, { target: { value: "Agent xotirasi qanday ishlaydi?" } });
   await act_(() => fireEvent.click(screen.getByRole("button", { name: /^send$/i })));
   expect(send).toHaveBeenCalledWith("Agent xotirasi qanday ishlaydi?", "Dilnoza");
   expect(box.value).toBe("");
-  expect((screen.getByPlaceholderText(/your name/i) as HTMLInputElement).value).toBe("Dilnoza");
+  expect(screen.getByRole("button", { name: /dilnoza/i })).toBeTruthy();
   expect(screen.getByText("Sent")).toBeTruthy();
+});
+
+test("composer stays one row when empty", () => {
+  render(<Composer onSend={noop} />);
+  const box = screen.getByPlaceholderText(/type your question/i) as HTMLTextAreaElement;
+  fireEvent.focus(box);
+  expect(box.rows).toBe(1);
+  fireEvent.change(box, { target: { value: "one\ntwo\nthree" } });
+  expect(box.rows).toBe(3);
+  fireEvent.change(box, { target: { value: "" } });
+  expect(box.rows).toBe(1);
+});
+
+test("composer textarea opts out of password managers", () => {
+  render(<Composer onSend={noop} />);
+  const box = screen.getByPlaceholderText(/type your question/i);
+  expect(box.getAttribute("autocomplete")).toBe("off");
+  for (const a of ["data-1p-ignore", "data-lpignore", "data-bwignore"]) expect(box.hasAttribute(a), a).toBe(true);
+});
+
+test("name chip opens an inline input; a saved name shows on the chip", () => {
+  localStorage.setItem("savolbor_name", "Jasur");
+  const { unmount } = render(<Composer onSend={noop} />);
+  const chip = screen.getByRole("button", { name: /jasur/i });
+  expect(screen.queryByPlaceholderText(/your name/i)).toBeNull();
+  fireEvent.click(chip);
+  expect((screen.getByPlaceholderText(/your name/i) as HTMLInputElement).value).toBe("Jasur");
+  unmount();
+  localStorage.removeItem("savolbor_name");
+  render(<Composer onSend={noop} />);
+  expect(screen.getByRole("button", { name: /add your name/i })).toBeTruthy();
 });
 
 test("counter appears only near the limit and counts runes", () => {

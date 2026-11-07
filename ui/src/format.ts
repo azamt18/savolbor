@@ -13,7 +13,10 @@ export function ago(createdAt: string, now: number, t: T): string {
   const min = Math.floor((now - Date.parse(createdAt)) / 60_000);
   if (min < 1) return t("justNow");
   if (min < 60) return t("minutesAgo", { n: min });
-  return new Date(createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // 24h HH:MM, never the browser locale's "07:23 PM"
+  const d = new Date(createdAt);
+  const two = (n: number) => String(n).padStart(2, "0");
+  return `${two(d.getHours())}:${two(d.getMinutes())}`;
 }
 
 // host:port only, for the projector and the invite

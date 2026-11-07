@@ -45,15 +45,15 @@ export function Projector({ view, onExit, onNext, onHide }: { view: View } & Han
   const exit = (
     <div className={"pj-controls" + (shown ? " is-shown" : "")}>
       {onExit && (
-        <button type="button" onClick={onExit}>{t("exitProjector")} <kbd>esc</kbd></button>
+        <button type="button" onClick={onExit}>{t("exitProjector")} <kbd className="pj-key">esc</kbd></button>
       )}
       {onNext && (current || hasQueue) && (
         <button type="button" className="primary" onClick={onNext}>
-          {t(current ? "doneNext" : "answerNow")} <kbd>n</kbd>
+          {t(current ? "doneNext" : "answerNow")} <kbd className="pj-key">n</kbd>
         </button>
       )}
       {onHide && current && (
-        <button type="button" onClick={() => onHide(current.id)}>{t("hide")} <kbd>x</kbd></button>
+        <button type="button" onClick={() => onHide(current.id)}>{t("hide")} <kbd className="pj-key">x</kbd></button>
       )}
     </div>
   );

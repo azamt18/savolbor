@@ -69,21 +69,21 @@ export function HostApp() {
 
   return (
     <div className="host">
-      <header className="hbar">
+      <header className="bar">
         <span className="brand">{t("title")}</span>
         <TitleInput value={view?.title ?? ""} onSave={(title) => run(() => api.title(title))} />
         <span className={"live" + (status === "offline" ? " is-off" : "")} role="status">
           <span className="dot" aria-hidden="true" />
           {status === "offline" ? t("offline") : t("connected", { n: view?.connected ?? 0 })}
         </span>
-        <a className="hbtn" href="/api/host/export.md" download>{t("export")}</a>
-        <button type="button" className="hbtn" onClick={() => setProjector(true)}>
+        <a className="btn" href="/api/host/export.md" download title={t("exportHint")}>{t("export")}</a>
+        <button type="button" className="btn" onClick={() => setProjector(true)}>
           {t("projector")} <kbd>p</kbd>
         </button>
         <LangToggle />
       </header>
 
-      {error && <p className="error" role="alert">{t(errorKey(error.code))}</p>}
+      {error && <p className="error host-error" role="alert">{t(errorKey(error.code))}</p>}
 
       <main className="hgrid">
         <NowPanel

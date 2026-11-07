@@ -25,3 +25,8 @@ test("errorKey falls back to internal", async () => {
   expect(errorKey("not_found")).toBe("err_not_found");
   expect(errorKey("weird")).toBe("err_internal");
 });
+
+test("export label is understandable", () => {
+  expect(dict.uz.export).toBe("Savollarni yuklab olish");
+  expect(dict.en.export).toBe("Download questions");
+});

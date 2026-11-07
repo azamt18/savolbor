@@ -105,3 +105,22 @@ test("connected count shows on the host page", () => {
   render(<HostApp />);
   expect(screen.getByText("23 connected")).toBeTruthy();
 });
+
+test("host controls share one size class", () => {
+  const cur = q({ text: "now" });
+  mockBoard(view([cur, q()], { highlighted: cur.id }));
+  const { container } = render(<HostApp />);
+  const controls = container.querySelectorAll("header button, header a, .now-card button");
+  expect(controls.length).toBeGreaterThan(5);
+  controls.forEach((el) => {
+    expect(el.classList.contains("btn"), el.outerHTML).toBe(true);
+    expect(el.classList.contains("big"), el.outerHTML).toBe(false);
+  });
+});
+
+test("export link explains the file format", () => {
+  mockBoard(view([]));
+  render(<HostApp />);
+  const link = screen.getByRole("link", { name: "Download questions" });
+  expect(link.getAttribute("title")).toMatch(/\.md/);
+});

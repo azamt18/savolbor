@@ -40,16 +40,3 @@
   --tap: 44px;
   --radius: 12px;
 }
-
-/* dark is for phones only; /host and the projector set data-theme="light" */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0F1424;
-    --surface: #182036;
-    --ink: #E8ECF5;
-    --muted: #9AA3B8;
-    --line: #26304A;
-    --lojuvard: #7D9BFF;
-    --firuza: #3CCFBC;
-  }
-}

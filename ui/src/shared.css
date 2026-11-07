@@ -1,0 +1,125 @@
+/* shared look for the phone page and /host: one app, one set of controls.
+   page css files only lay things out; they never restyle these selectors. */
+
+/* top bar */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.brand { margin: 0; font-size: var(--fs-m); font-weight: 600; }
+.brand-sub { font-size: var(--fs-s); font-weight: 400; color: var(--muted); }
+
+/* every control is --tap tall; primary differs by colour and weight only */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-s);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--lojuvard); border-color: var(--lojuvard); color: #fff; font-weight: 600; }
+.btn.quiet { border-color: transparent; background: none; color: var(--muted); }
+.btn.danger { border-color: #B42318; color: #B42318; }
+.btn:disabled { opacity: .5; }
+kbd {
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* language toggle: two buttons joined into one control */
+.lang { display: inline-flex; }
+.lang .btn { min-width: var(--tap); padding: 0 10px; border-radius: 0; color: var(--muted); }
+.lang .btn:first-child { border-radius: 8px 0 0 8px; }
+.lang .btn:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
+.lang .btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); font-weight: 600; }
+
+/* connection status */
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-s);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--firuza); }
+.live.is-off .dot { background: var(--muted); }
+
+/* underlined tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs [role="tab"] {
+  min-height: var(--tap);
+  padding: 0 14px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-size: var(--fs-s);
+}
+.tabs [role="tab"][aria-selected="true"] { border-bottom-color: var(--lojuvard); color: var(--ink); font-weight: 600; }
+
+/* question text and the line under it */
+.q-text { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.meta { margin: 4px 0 0; font-size: var(--fs-s); color: var(--muted); }
+.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hint { margin: 16px 0; color: var(--muted); }
+
+/* vote: a square tile, count under the arrow */
+.vote {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-s);
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.vote svg { width: 14px; height: 14px; color: var(--firuza); }
+/* dark text on firuza: white would be 3.3:1 */
+.vote[aria-pressed="true"] { background: var(--firuza); border-color: var(--firuza); color: #0F1424; opacity: 1; }
+.vote[aria-pressed="true"] svg { color: #0F1424; }
+
+/* now answering: white card with the zar top edge, on both pages */
+.now-card {
+  padding: 16px 20px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 6px solid var(--zar);
+  border-radius: var(--radius);
+}
+.now-label { margin: 0 0 6px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+
+.error { margin: 0 0 8px; font-size: var(--fs-s); color: #B42318; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .vote { transition: background-color .15s, color .15s; }
+}

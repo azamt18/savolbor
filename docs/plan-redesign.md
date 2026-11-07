@@ -8,7 +8,7 @@
 
 **Tech Stack:** go 1.26 (existing), react 18 + react-dom, typescript, vite, vitest + @testing-library/react + jsdom (dev only), onest font (ofl) embedded as woff2.
 
-**Status (2026-11-07):** tasks 1–7 done on `feat/savolbor`; deviations are listed under [as built](#as-built).
+**Status (2026-11-07):** tasks 1–8 done on `feat/savolbor`; deviations are listed under [as built](#as-built).
 
 **Spec:** [spec.md](spec.md) — see "ui redesign (2026-11-07)". builds on the as-built state described in [plan.md](plan.md).
 
@@ -293,17 +293,17 @@ products/savolbor/
 - now card: white card with the 6px zar top edge, same as the host's now panel; vote control on the right.
 - composer: textarea grows 1 → 3 rows only while it has text (not on focus); the name is a small chip ("+ ism" / the saved name) inside the composer row, left of the send button, tapping it opens an inline input. no second, offset row. `autocomplete="off"` and `data-1p-ignore`, `data-lpignore="true"`, `data-bwignore` on the textarea so password-manager buttons stay out of it.
 
-- [ ] **Step 1: write failing tests:**
+- [x] **Step 1: write failing tests:**
   - `ago uses 24h clock` — a question 2h old renders `19:23`, not `07:23 PM`, for both `uz` and `en`, with the test forcing `navigator.language = "en-US"`.
   - `export label is understandable` — `dict.uz.export === "Savollarni yuklab olish"`, `dict.en.export === "Download questions"`; i18n key parity still passes.
   - `host controls share one size class` — every button in the host top bar and now panel has class `btn` and none has `big`.
   - `composer stays one row when empty` — focus without typing keeps `rows=1`; typing 3 lines gives `rows=3`.
   - `name chip` — tapping the chip shows the name input; a saved name shows on the chip after reload (storage).
-- [ ] **Step 2: run** `cd ui && npm test` → FAIL.
-- [ ] **Step 3: implement** — `shared.css` first, then delete the duplicated rules from both page css files, then component class changes, then composer.
-- [ ] **Step 4: run** `make test` → PASS; `grep -n "prefers-color-scheme" ui/src` → nothing; each selector in `shared.css` appears in no other css file.
-- [ ] **Step 5: visual check** — phone at 390×844 with the os in **dark** mode (must still render light), `/host` at 1280×800: top bars match, buttons line up at one height, now card looks the same on both, no am/pm anywhere.
-- [ ] **Step 6: commit** — `feat(savolbor): align participant ui with host`.
+- [x] **Step 2: run** `cd ui && npm test` → FAIL.
+- [x] **Step 3: implement** — `shared.css` first, then delete the duplicated rules from both page css files, then component class changes, then composer.
+- [x] **Step 4: run** `make test` → PASS; `grep -n "prefers-color-scheme" ui/src` → nothing; each selector in `shared.css` appears in no other css file.
+- [x] **Step 5: visual check** — phone at 390×844 with the os in **dark** mode (must still render light), `/host` at 1280×800: top bars match, buttons line up at one height, now card looks the same on both, no am/pm anywhere.
+- [x] **Step 6: commit** — `feat(savolbor): align participant ui with host`.
 
 ---
 
@@ -317,3 +317,4 @@ decisions taken during execution that differ from the text above:
 - **now strip (phone):** tapping expands the clamped text; the highlighted question has no row in the list to scroll to.
 - **`TestServesBuiltPages`** lives in `dist_test.go` (root package), so `server` tests don't depend on a build.
 - **fonts** come from `@fontsource/onest` (latin + latin-ext, 400/600 only).
+- **task 8:** the composer grows by text length too (≈34 characters per row on a phone), not only by line breaks; the projector's key hints use `.pj-key` so `kbd` is styled only in `shared.css`; the export button's `title` reads "Markdown fayl (.md)".

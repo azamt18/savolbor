@@ -28,7 +28,7 @@ export function Queue(p: Props) {
   const { t } = useT();
   return (
     <section className="queue">
-      <div className="htabs" role="tablist">
+      <div className="tabs" role="tablist">
         {TABS.map(({ id, key }) => (
           <button key={id} type="button" role="tab" aria-selected={p.tab === id} onClick={() => p.setTab(id)}>
             {t(key)} <span className="n">{p.counts[id]}</span>
@@ -57,16 +57,16 @@ export function Queue(p: Props) {
               {p.tab === "queue" && (
                 <>
                   {q.id !== p.highlighted && (
-                    <button type="button" className="hbtn" onClick={() => p.onAnswerNow(q.id)}>{t("answerNow")}</button>
+                    <button type="button" className="btn" onClick={() => p.onAnswerNow(q.id)}>{t("answerNow")}</button>
                   )}
-                  <button type="button" className="hbtn" onClick={() => p.onHidden(q.id, true)}>{t("hide")}</button>
+                  <button type="button" className="btn" onClick={() => p.onHidden(q.id, true)}>{t("hide")}</button>
                 </>
               )}
               {p.tab === "answered" && (
-                <button type="button" className="hbtn" onClick={() => p.onAnswered(q.id, false)}>{t("unmarkAnswered")}</button>
+                <button type="button" className="btn" onClick={() => p.onAnswered(q.id, false)}>{t("unmarkAnswered")}</button>
               )}
               {p.tab === "hidden" && (
-                <button type="button" className="hbtn" onClick={() => p.onHidden(q.id, false)}>{t("unhide")}</button>
+                <button type="button" className="btn" onClick={() => p.onHidden(q.id, false)}>{t("unhide")}</button>
               )}
             </div>
           </li>

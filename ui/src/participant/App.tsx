@@ -59,10 +59,13 @@ export function App() {
 
   return (
     <div className="page">
-      <header className="top">
-        <h1 className="brand">
-          {t("title")}
-          {view?.title && <span className="session"> · {view.title}</span>}
+      <header className="bar">
+        <h1 className="brand page-bar-title">
+          {view?.title ? (
+            <>
+              {view.title} <span className="brand-sub">{t("title")}</span>
+            </>
+          ) : t("title")}
         </h1>
         <span className={"live" + (status === "offline" ? " is-off" : "")} role="status">
           <span className="dot" aria-hidden="true" />

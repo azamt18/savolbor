@@ -7,7 +7,7 @@ export function NowStrip({ q, onVote }: { q: QuestionView; onVote(id: string): P
   const { t } = useT();
   const [open, setOpen] = useState(false);
   return (
-    <section className="now" aria-label={t("nowAnswering")}>
+    <section className="now-card now-strip" aria-label={t("nowAnswering")}>
       <button type="button" className="now-body" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="now-label">{t("nowAnswering")}</span>
         <span className={"q-text" + (open ? "" : " clamp")}>{q.text}</span>
