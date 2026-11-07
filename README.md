@@ -24,6 +24,8 @@ tips:
 - **phone hotspots** usually cap at ~10–30 devices. for bigger groups use the venue wi-fi or a travel router.
 - **macos firewall**: on first run macos asks whether to accept incoming connections — choose *allow*, otherwise phones can't connect.
 - **vpn on**: the join url prefers wi-fi/ethernet/hotspot addresses over vpn tunnels. every other address is printed under *other addresses* if you need to pick one by hand.
+- **address changed?** the join url is worked out at startup. if the laptop switches networks (or gets a new address), restart savolbor so the qr code points to the new one.
+- **work laptops**: corporate vpn / security agents (globalprotect, sentinelone, …) can silently drop incoming lan connections even when the macos firewall allows them. run `./savolbor -debug`, open the url from a phone: no log line means the laptop is blocking it — use a personal machine.
 - some venue networks isolate clients from each other ("ap isolation"). if phones can't open the url, use a hotspot instead.
 
 ## flags
@@ -32,6 +34,7 @@ tips:
 |---|---|---|
 | `-port` | `8080` | port to listen on |
 | `-data` | `savolbor-YYYY-MM-DD.jsonl` | event log file |
+| `-debug` | off | log every request — if a phone connects and no line appears, its request never reached the laptop |
 
 ## data and export
 

@@ -36,7 +36,11 @@ func main() {
 func run() error {
 	port := flag.Int("port", 8080, "port to listen on")
 	data := flag.String("data", "savolbor-"+time.Now().Format("2006-01-02")+".jsonl", "event log file")
+	debug := flag.Bool("debug", false, "log every request (use when phones can't connect)")
 	flag.Parse()
+	if *debug {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
 
 	log, events, err := store.Open(*data)
 	if err != nil {
@@ -69,7 +73,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	handler := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static})
+	var handler http.Handler = server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static})
+	if *debug {
+		handler = logRequests(handler)
+	}
 
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
@@ -89,6 +96,10 @@ func run() error {
 	}
 
 	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all)
+	if *debug {
+		fmt.Println("  debug: logging every request. no log line when a phone connects = it never reached this laptop")
+		fmt.Println()
+	}
 
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
