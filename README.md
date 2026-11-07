@@ -16,6 +16,15 @@ after changing the ui (`ui/`, react + typescript + vite), rebuild it and the bin
 make build      # npm ci + vite build into web/dist, then go build
 ```
 
+## quick start
+
+```bash
+./workshop.sh            # build + start, phones on the same wi-fi
+./workshop.sh --public   # build + cloudflare tunnel + start with the tunnel url
+```
+
+ctrl+c stops everything. `PORT=8081 ./workshop.sh` picks another port; data goes to `~/savolbor-YYYY-MM-DD.jsonl` (override with `DATA=…`).
+
 ## run in a room
 
 1. connect the laptop to the venue wi-fi (or turn on a hotspot / travel router).
