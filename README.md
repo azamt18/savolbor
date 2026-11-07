@@ -4,52 +4,101 @@ live q&a for workshops, lessons and seminars. participants send and upvote quest
 
 ## start (no install)
 
-two ways to run it. both give you the presenter page on your laptop and a qr code for phones. the commands below are for a mac with apple silicon (m1 or newer); other laptops are in the table at the end.
+works on any network, even phones on mobile data: savolbor opens a public link for the session. click your laptop below for the commands (not sure which mac you have? → *about this mac*: "chip apple m…" is apple silicon, "processor intel" is intel).
 
-### a. phones anywhere (public link) — recommended
+<details>
+<summary><b>mac, apple silicon (m1 or newer)</b></summary>
 
-works on any network, even phones on mobile data. paste this into **terminal** (cmd+space, type `terminal`):
+open **terminal** (cmd+space, type terminal) and paste:
 
 ```bash
 cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-darwin-arm64.zip && unzip -oq savolbor-darwin-arm64.zip && cd savolbor-darwin-arm64 && ./workshop.sh --public
 ```
 
-that one line downloads savolbor, downloads the tunnel tool (cloudflared, first run only) and starts everything. then:
+this downloads savolbor and, on the first run, the tunnel tool (cloudflared), then starts both.
 
-1. the presenter page opens in your browser by itself. if it doesn't, open the `presenter` link the terminal prints (it ends with `?key=…`).
-2. press **projector** (or `p`) and put it on the big screen. people scan the qr code. click the qr card for a full-screen code.
-3. when you finish, press **ctrl+c** in the terminal. this closes the public link. anyone with the link can ask questions until then.
-
-next time (the files are already there):
+next time, the files are already there:
 
 ```bash
 cd ~/Downloads/savolbor-darwin-arm64 && ./workshop.sh --public
 ```
 
-the public link is new on every start, so the qr code changes too. questions are saved in `~/savolbor-YYYY-MM-DD.jsonl`; starting again the same day restores them.
+same wi-fi only, no public link: run `./workshop.sh` without `--public`. the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect.
 
-### b. same wi-fi only, no tunnel
+</details>
 
-phones must be on the same wi-fi as the laptop. same download, different last command:
+<details>
+<summary><b>mac, intel</b></summary>
+
+open **terminal** (cmd+space, type terminal) and paste:
 
 ```bash
-cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-darwin-arm64.zip && unzip -oq savolbor-darwin-arm64.zip && cd savolbor-darwin-arm64 && ./workshop.sh
+cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-darwin-amd64.zip && unzip -oq savolbor-darwin-amd64.zip && cd savolbor-darwin-amd64 && ./workshop.sh --public
 ```
 
-the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect. add your wi-fi name so people on mobile data notice they must switch: `./savolbor -wifi "venue wifi"` instead of `./workshop.sh`.
+this downloads savolbor and, on the first run, the tunnel tool (cloudflared), then starts both.
 
-### other laptops
+next time, the files are already there:
 
-| laptop | file (same link, other name) | start |
-|---|---|---|
-| mac, apple silicon | `savolbor-darwin-arm64.zip` | `./workshop.sh --public` |
-| mac, intel | `savolbor-darwin-amd64.zip` | `./workshop.sh --public` |
-| linux | `savolbor-linux-amd64.zip` | `./workshop.sh --public` |
-| windows | `savolbor-windows-amd64.zip` | same wi-fi only: in powershell, `.\savolbor.exe -wifi "venue wifi"`; allow **private networks** in the firewall prompt, and choose *more info*, then *run anyway* if smartscreen blocks it. for a public link on windows, install [cloudflared](https://github.com/cloudflare/cloudflared/releases) and see *over the internet* below |
+```bash
+cd ~/Downloads/savolbor-darwin-amd64 && ./workshop.sh --public
+```
 
-download page for all files: https://github.com/azamt18/savolbor/releases/latest
+same wi-fi only, no public link: run `./workshop.sh` without `--public`. the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect.
 
-if something doesn't work: phones can't open the link → see *run in a room* below (vpn, firewall, client isolation).
+</details>
+
+<details>
+<summary><b>windows</b></summary>
+
+open **powershell** (start menu, type `powershell`) and paste. it downloads savolbor and the tunnel tool (cloudflared), then starts the tunnel:
+
+```powershell
+cd $HOME\Downloads; Invoke-WebRequest https://github.com/azamt18/savolbor/releases/latest/download/savolbor-windows-amd64.zip -OutFile savolbor.zip; Expand-Archive -Force savolbor.zip .; cd savolbor-windows-amd64; Invoke-WebRequest https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -OutFile cloudflared.exe; .\cloudflared.exe tunnel --url http://localhost:8080
+```
+
+wait for a line with `https://….trycloudflare.com` and copy that address. keep this window open, open a **second** powershell window and paste, with your address at the end:
+
+```powershell
+cd $HOME\Downloads\savolbor-windows-amd64; .\savolbor.exe -public-url https://your-address.trycloudflare.com
+```
+
+next time, skip the downloads. window 1: `cd $HOME\Downloads\savolbor-windows-amd64; .\cloudflared.exe tunnel --url http://localhost:8080`, window 2: as above, with the new address.
+
+same wi-fi only, no public link: just `.\savolbor.exe` in one window. the first start asks for firewall access: allow **private networks**, otherwise phones can't connect. if smartscreen says "windows protected your pc", choose *more info*, then *run anyway*.
+
+</details>
+
+<details>
+<summary><b>linux</b></summary>
+
+open **terminal** (your terminal app) and paste:
+
+```bash
+cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-linux-amd64.zip && unzip -oq savolbor-linux-amd64.zip && cd savolbor-linux-amd64 && ./workshop.sh --public
+```
+
+this downloads savolbor and, on the first run, the tunnel tool (cloudflared), then starts both.
+
+next time, the files are already there:
+
+```bash
+cd ~/Downloads/savolbor-linux-amd64 && ./workshop.sh --public
+```
+
+same wi-fi only, no public link: run `./workshop.sh` without `--public`.
+
+</details>
+
+then, on every laptop:
+
+1. the presenter page opens in your browser by itself. if it doesn't, open the `presenter` link the terminal prints (it ends with `?key=…`).
+2. press **projector** (or `p`) and put it on the big screen. people scan the qr code. click the qr card for a full-screen code.
+3. when you finish, press **ctrl+c** in the terminal (on windows, in both windows). this closes the public link; anyone with the link can ask questions until then.
+
+the public link is new on every start, so the qr code changes too. questions are saved in a `savolbor-YYYY-MM-DD.jsonl` file; starting again the same day restores them.
+
+all downloads: https://github.com/azamt18/savolbor/releases/latest. phones can't open the link? see *run in a room* below (vpn, firewall, client isolation).
 
 ---
 
