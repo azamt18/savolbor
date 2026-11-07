@@ -35,3 +35,16 @@ test("Escape still works inside inputs", () => {
   press("Escape", input);
   expect(esc).toHaveBeenCalledTimes(1);
 });
+
+test("Enter on a focused button or link activates it, not the shortcut", () => {
+  const enter = vi.fn();
+  renderHook(() => useShortcuts({ Enter: enter }));
+  const btn = document.body.appendChild(document.createElement("button"));
+  const link = document.body.appendChild(document.createElement("a"));
+  link.href = "/x";
+  press("Enter", btn);
+  press("Enter", link);
+  expect(enter).not.toHaveBeenCalled();
+  press("Enter");
+  expect(enter).toHaveBeenCalledTimes(1);
+});
