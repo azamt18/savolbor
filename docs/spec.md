@@ -53,7 +53,7 @@ decided after reviewing screenshots of the first ui ("works, but looks like a de
 |---|---|
 | ui stack | react + typescript + vite in `ui/`, built into `web/dist` and embedded; `web/dist` committed so `go build` works without node |
 | theme | light only on every page (dark mode on phones dropped 2026-11-07, task 8: phone and host must look like one app) |
-| palette | paper `#F7F8FA`, ink `#16203A`, lojuvard `#2448A8` (primary), firuza `#0E9F8E` (votes), zar `#E2A43B` ("now answering" only), muted `#6B7489` |
+| palette | paper `#F7F8FA`, ink `#16203A`, lojuvard `#2448A8` (primary), firuza `#0E9F8E` (votes), zar `#E2A43B` ("now answering" only), muted `#646D82` (darkened from `#6B7489` for aa contrast on paper) |
 | type | onest 400/600 embedded (ofl), system fallback |
 | signature moment | "now answering" fills the projector on a zar band; the only orchestrated motion |
 | phone | sticky bottom composer, name behind "add your name", vote pill on the right, tabs top / new / mine, own questions behind a `⋯` menu, answered collapsed |

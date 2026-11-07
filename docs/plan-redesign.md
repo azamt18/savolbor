@@ -317,4 +317,4 @@ decisions taken during execution that differ from the text above:
 - **now strip (phone):** tapping expands the clamped text; the highlighted question has no row in the list to scroll to.
 - **`TestServesBuiltPages`** lives in `dist_test.go` (root package), so `server` tests don't depend on a build.
 - **fonts** come from `@fontsource/onest` (latin + latin-ext, 400/600 only).
-- **task 8:** the composer grows by text length too (≈34 characters per row on a phone), not only by line breaks; the projector's key hints use `.pj-key` so `kbd` is styled only in `shared.css`; the export button's `title` reads "Markdown fayl (.md)".
+- **task 8:** the composer grows by text length too (≈34 characters per row on a phone), not only by line breaks; the projector's key hints use `.pj-key` so `kbd` is styled only in `shared.css`; the export button's `title` reads "Markdown fayl (.md)" (new key `exportHint`); the name chip uses a new key `nameChip` ("+ ism" / "+ name"); the host's now card always shows the zar top edge, even when empty; `data-theme` is gone and both pages declare `color-scheme: light`.
