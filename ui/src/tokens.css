@@ -27,6 +27,7 @@
   --muted: #646D82; /* plan: #6B7489, darkened to pass aa on --paper (4.41 → 4.88) */
   --line: #E3E6ED;
   --lojuvard: #2448A8;
+  --lojuvard-tint: #E6EAF3; /* lojuvard at 8% on --paper: the selected row */
   --firuza: #0E9F8E;
   --zar: #E2A43B;
 

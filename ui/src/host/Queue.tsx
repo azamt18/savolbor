@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { QuestionView } from "../api";
 import { useT } from "../i18n";
 import { ago } from "../format";
@@ -26,6 +27,7 @@ const TABS: { id: HostTab; key: "queue" | "answered" | "hidden" }[] = [
 
 export function Queue(p: Props) {
   const { t } = useT();
+  const [hover, setHover] = useState<string | null>(null);
   return (
     <section className="queue">
       <div className="tabs" role="tablist">
@@ -44,17 +46,22 @@ export function Queue(p: Props) {
             aria-current={q.id === p.selected}
             className={q.id === p.highlighted ? "is-now" : undefined}
             onClick={() => p.onSelect(q.id)}
+            onMouseEnter={() => setHover(q.id)}
+            onMouseLeave={() => setHover((h) => (h === q.id ? null : h))}
           >
             <span className="hvotes" aria-label={`${q.votes} ${t("vote")}`}>{q.votes}</span>
             <div className="hbody">
-              <p className="q-text">{q.text}</p>
+              <p className="q-text">
+                {q.id === p.highlighted && <span className="chip">{t("nowChip")}</span>}
+                {q.text}
+              </p>
               <p className="meta">
                 {q.name || t("anonymous")} · {ago(q.createdAt, p.now, t)}
                 {q.edited && `, ${t("edited")}`}
               </p>
             </div>
             <div className="hactions" onClick={(e) => e.stopPropagation()}>
-              {p.tab === "queue" && (
+              {(q.id === p.selected || q.id === hover) && p.tab === "queue" && (
                 <>
                   {q.id !== p.highlighted && (
                     <button type="button" className="btn" onClick={() => p.onAnswerNow(q.id)}>{t("answerNow")}</button>
@@ -62,10 +69,10 @@ export function Queue(p: Props) {
                   <button type="button" className="btn" onClick={() => p.onHidden(q.id, true)}>{t("hide")}</button>
                 </>
               )}
-              {p.tab === "answered" && (
+              {(q.id === p.selected || q.id === hover) && p.tab === "answered" && (
                 <button type="button" className="btn" onClick={() => p.onAnswered(q.id, false)}>{t("unmarkAnswered")}</button>
               )}
-              {p.tab === "hidden" && (
+              {(q.id === p.selected || q.id === hover) && p.tab === "hidden" && (
                 <button type="button" className="btn" onClick={() => p.onHidden(q.id, false)}>{t("unhide")}</button>
               )}
             </div>

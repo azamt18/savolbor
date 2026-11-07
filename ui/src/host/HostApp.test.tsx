@@ -143,3 +143,12 @@ test("join qr shows under the now panel", () => {
   expect(card.tagName).toBe("BUTTON");
   expect(card.textContent).toBe("192.168.1.23:8080");
 });
+
+test("top-bar actions carry an icon next to their label, hidden from screen readers", () => {
+  mockBoard(view([a]));
+  render(<HostApp />);
+  const targets = [screen.getByRole("link", { name: /download questions/i }), screen.getByRole("button", { name: /projector/i })];
+  for (const el of targets) expect(el.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+  expect(screen.getByRole("group", { name: /til/ }).querySelector("svg")).not.toBeNull();
+  expect(screen.getByRole("banner").querySelector(".logo svg")).not.toBeNull();
+});

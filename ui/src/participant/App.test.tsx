@@ -157,3 +157,10 @@ test("hint still shows when storage is unavailable", () => {
   get.mockRestore();
   set.mockRestore();
 });
+
+test("participant header shares the logo mark and globe with the host", () => {
+  mockBoard(view([q()]));
+  render(<App />);
+  expect(screen.getByRole("banner").querySelector(".logo svg")).not.toBeNull();
+  expect(screen.getByRole("group", { name: /til/ }).querySelector("svg")).not.toBeNull();
+});

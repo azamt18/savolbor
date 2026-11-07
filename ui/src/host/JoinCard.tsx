@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { shortUrl } from "../format";
 import { useT } from "../i18n";
+import { ExpandIcon } from "../icons";
 
 const qrSrc = (url: string) => "/qr.png?u=" + encodeURIComponent(url);
 
@@ -24,6 +25,7 @@ export function JoinCard({ url, wifi }: { url: string; wifi?: string }) {
       <button ref={card} type="button" className="join-card" aria-label={t("enlargeQr")} onClick={() => setOpen(true)}>
         <img src={qrSrc(url)} alt={"QR " + shortUrl(url)} />
         <span className="join-url">{shortUrl(url)}</span>
+        <span className="join-expand"><ExpandIcon /></span>
       </button>
       {open && <QrOverlay url={url} wifi={wifi} onClose={close} />}
     </>

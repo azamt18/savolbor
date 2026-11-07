@@ -5,6 +5,7 @@ import { useBoard } from "../useBoard";
 import { highlightedQuestion, visibleList, withVote, type Tab } from "../select";
 import { useNow } from "../useNow";
 import { LangToggle } from "../LangToggle";
+import { LogoIcon } from "../icons";
 import { QuestionRow } from "./QuestionRow";
 import { NowStrip } from "./NowStrip";
 import { Composer } from "./Composer";
@@ -65,6 +66,7 @@ export function App() {
   return (
     <div className="page">
       <header className="bar">
+        <span className="logo"><LogoIcon /></span>
         <h1 className="brand page-bar-title">
           {view?.title ? (
             <>

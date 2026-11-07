@@ -1,6 +1,7 @@
 import type { QuestionView } from "../api";
 import { useT } from "../i18n";
 import { ago } from "../format";
+import { CheckIcon } from "../icons";
 
 type Props = {
   current?: QuestionView;
@@ -23,7 +24,7 @@ export function NowPanel({ current, top, now, onNext, onHide, onClear }: Props) 
             ▲ {current.votes} · {current.name || t("anonymous")} · {ago(current.createdAt, now, t)}
           </p>
           <div className="now-actions">
-            <button type="button" className="btn primary" onClick={onNext}>{t("doneNext")}</button>
+            <button type="button" className="btn primary" onClick={onNext}><CheckIcon />{t("doneNext")}</button>
             <button type="button" className="btn" onClick={() => onHide(current.id)}>{t("hide")}</button>
             <button type="button" className="btn quiet" onClick={onClear}>{t("unhighlight")}</button>
           </div>
