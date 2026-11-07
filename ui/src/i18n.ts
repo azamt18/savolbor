@@ -64,6 +64,8 @@ const uz = {
   inviteHeadline: "Savolingiz bormi?",
   scanToAsk: "Skanerlang yoki shu manzilni oching",
   wifiName: "Wi-Fi: {name}",
+  printCard: "Bosib chiqarish",
+  sameWifi: "Telefoningiz shu Wi-Fi'ga ulangan boʻlsin",
   shortcuts: "j/k — tanlash · enter — javob berish · n — tayyor, keyingisi · x — yashirish · p — proyektor",
 };
 
@@ -131,6 +133,8 @@ const en: Record<Key, string> = {
   inviteHeadline: "Got a question?",
   scanToAsk: "Scan or open this address",
   wifiName: "Wi-Fi: {name}",
+  printCard: "Print join card",
+  sameWifi: "Join the same Wi-Fi",
   shortcuts: "j/k — select · enter — answer now · n — done, next · x — hide · p — projector",
 };
 

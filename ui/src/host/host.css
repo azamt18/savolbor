@@ -37,6 +37,20 @@
   border-radius: var(--radius);
 }
 .join-card img { width: 100%; max-width: 360px; height: auto; aspect-ratio: 1; image-rendering: pixelated; }
+.print-card { display: none; }
+@media print {
+  /* only the join card goes to paper */
+  body * { visibility: hidden; }
+  .print-card, .print-card * { visibility: visible; }
+  .print-card {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+    padding: 24px; text-align: center; color: #000; background: #fff;
+  }
+  .print-card img { width: 70vmin; height: 70vmin; image-rendering: pixelated; }
+  .print-card .print-url { margin: 0; font-size: 36pt; font-weight: 600; overflow-wrap: anywhere; }
+  .print-card .print-wifi { margin: 0; font-size: 20pt; }
+}
 @media (max-width: 900px) {
   .hgrid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "now" "queue"; }
   .host-side { position: static; }

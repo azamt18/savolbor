@@ -96,7 +96,7 @@ export function HostApp() {
             onHide={(id) => hide(id, true)}
             onClear={() => run(() => api.highlight(""))}
           />
-          <JoinCard url={view?.joinUrl ?? location.origin} />
+          <JoinCard url={view?.joinUrl ?? location.origin} wifi={view?.wifi} />
         </aside>
         <Queue
           tab={tab}
