@@ -132,3 +132,28 @@ test("counter appears only near the limit and counts runes", () => {
 async function act_(fn: () => void) {
   await act(async () => { fn(); });
 }
+
+test("first-visit hint shows once and stays dismissed", () => {
+  localStorage.clear();
+  mockBoard(view([q()]));
+  const { unmount } = render(<App />);
+  expect(screen.getByText("Ask, and upvote others")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+  expect(screen.queryByText("Ask, and upvote others")).toBeNull();
+  unmount();
+  render(<App />);
+  expect(screen.queryByText("Ask, and upvote others")).toBeNull();
+  localStorage.clear();
+});
+
+test("hint still shows when storage is unavailable", () => {
+  localStorage.clear();
+  const get = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
+  const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
+  mockBoard(view([q()]));
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+  expect(screen.queryByText("Ask, and upvote others")).toBeNull();
+  get.mockRestore();
+  set.mockRestore();
+});

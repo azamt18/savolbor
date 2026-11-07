@@ -65,6 +65,8 @@ const uz = {
   scanToAsk: "Skanerlang yoki shu manzilni oching",
   wifiName: "Wi-Fi: {name}",
   printCard: "Bosib chiqarish",
+  firstHint: "Savolingizni yozing, boshqalarning savoliga ovoz bering",
+  dismiss: "Yopish",
   sameWifi: "Telefoningiz shu Wi-Fi'ga ulangan boʻlsin",
   shortcuts: "j/k — tanlash · enter — javob berish · n — tayyor, keyingisi · x — yashirish · p — proyektor",
 };
@@ -134,6 +136,8 @@ const en: Record<Key, string> = {
   scanToAsk: "Scan or open this address",
   wifiName: "Wi-Fi: {name}",
   printCard: "Print join card",
+  firstHint: "Ask, and upvote others",
+  dismiss: "Dismiss",
   sameWifi: "Join the same Wi-Fi",
   shortcuts: "j/k — select · enter — answer now · n — done, next · x — hide · p — projector",
 };

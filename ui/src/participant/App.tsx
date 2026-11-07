@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type ApiError } from "../api";
-import { errorKey, useT } from "../i18n";
+import { errorKey, storage, useT } from "../i18n";
 import { useBoard } from "../useBoard";
 import { highlightedQuestion, visibleList, withVote, type Tab } from "../select";
 import { useNow } from "../useNow";
@@ -22,6 +22,11 @@ export function App() {
   const [tab, setTab] = useState<Tab>("top");
   const [error, setError] = useState<ApiError | null>(null);
   const scrollTo = useRef<string | null>(null);
+  const [hintSeen, setHintSeen] = useState(() => storage.get("savolbor_hint") === "1");
+  const dismissHint = () => {
+    setHintSeen(true);
+    storage.set("savolbor_hint", "1");
+  };
 
   // scroll a just-sent question into view once its snapshot arrives
   useEffect(() => {
@@ -75,6 +80,12 @@ export function App() {
       </header>
 
       <main className="column">
+        {!hintSeen && (
+          <p className="first-hint">
+            <span>{t("firstHint")}</span>
+            <button type="button" className="btn quiet" onClick={dismissHint}>{t("dismiss")}</button>
+          </p>
+        )}
         {now_ && <NowStrip q={now_} onVote={vote} />}
 
         {!empty && (

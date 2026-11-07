@@ -16,6 +16,13 @@
   padding: 16px 16px 24px;
 }
 
+.first-hint {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin: 0 0 16px; padding: 0 0 0 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  font-size: var(--fs-s);
+}
+
 .now-strip { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
 .now-body {
   flex: 1; min-width: 0; display: flex; flex-direction: column;
