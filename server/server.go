@@ -51,6 +51,7 @@ func New(cfg Config) http.Handler {
 	mux.HandleFunc("PATCH /api/questions/{id}", s.edit)
 	mux.HandleFunc("DELETE /api/questions/{id}", s.delete)
 	mux.HandleFunc("POST /api/questions/{id}/vote", s.vote)
+	mux.HandleFunc("GET /api/events", s.events)
 
 	mux.HandleFunc("POST /api/host/questions/{id}/answered", s.host(s.toggle(cfg.Board.SetAnswered)))
 	mux.HandleFunc("POST /api/host/questions/{id}/hidden", s.host(s.toggle(cfg.Board.SetHidden)))
