@@ -1,0 +1,200 @@
+// Package server exposes the board over a small json api and sse.
+package server
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/fs"
+	"log/slog"
+	"net/http"
+	"time"
+
+	"github.com/skip2/go-qrcode"
+
+	"savolbor/qna"
+)
+
+const maxBody = 8 << 10
+
+type Config struct {
+	Board    *qna.Board
+	AdminKey string
+	JoinURL  string
+	Static   fs.FS            // web.Static sub-tree "static"
+	Now      func() time.Time // export date; defaults to time.Now
+}
+
+type server struct {
+	Config
+	qr []byte
+}
+
+func New(cfg Config) http.Handler {
+	if cfg.Now == nil {
+		cfg.Now = time.Now
+	}
+	s := &server{Config: cfg}
+	if png, err := qrcode.Encode(cfg.JoinURL, qrcode.Medium, 512); err == nil {
+		s.qr = png
+	} else {
+		slog.Warn("qr code", "err", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", s.page("index.html"))
+	mux.HandleFunc("GET /host", s.hostPage)
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(cfg.Static)))
+	mux.HandleFunc("GET /qr.png", s.qrPNG)
+
+	mux.HandleFunc("POST /api/questions", s.post)
+	mux.HandleFunc("PATCH /api/questions/{id}", s.edit)
+	mux.HandleFunc("DELETE /api/questions/{id}", s.delete)
+	mux.HandleFunc("POST /api/questions/{id}/vote", s.vote)
+
+	mux.HandleFunc("POST /api/host/questions/{id}/answered", s.host(s.toggle(cfg.Board.SetAnswered)))
+	mux.HandleFunc("POST /api/host/questions/{id}/hidden", s.host(s.toggle(cfg.Board.SetHidden)))
+	mux.HandleFunc("POST /api/host/highlight", s.host(s.highlight))
+	mux.HandleFunc("GET /api/host/export.md", s.host(s.export))
+	return withDevice(mux)
+}
+
+func (s *server) page(name string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		http.ServeFileFS(w, r, s.Static, name)
+	}
+}
+
+func (s *server) hostPage(w http.ResponseWriter, r *http.Request) {
+	if !IsHost(r, s.AdminKey) {
+		writeErr(w, http.StatusForbidden, "forbidden")
+		return
+	}
+	if key := r.URL.Query().Get("key"); key != "" {
+		setCookie(w, hostCookie, key)
+		http.Redirect(w, r, "/host", http.StatusSeeOther)
+		return
+	}
+	s.page("host.html")(w, r)
+}
+
+func (s *server) host(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !IsHost(r, s.AdminKey) {
+			writeErr(w, http.StatusForbidden, "forbidden")
+			return
+		}
+		next(w, r)
+	}
+}
+
+func (s *server) qrPNG(w http.ResponseWriter, r *http.Request) {
+	if s.qr == nil {
+		writeErr(w, http.StatusInternalServerError, "internal")
+		return
+	}
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(s.qr)
+}
+
+func (s *server) post(w http.ResponseWriter, r *http.Request) {
+	var body struct{ Text, Name string }
+	if !decode(w, r, &body) {
+		return
+	}
+	id, err := s.Board.Post(DeviceID(r), body.Text, body.Name)
+	if err != nil {
+		writeBoardErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+}
+
+func (s *server) edit(w http.ResponseWriter, r *http.Request) {
+	var body struct{ Text string }
+	if !decode(w, r, &body) {
+		return
+	}
+	reply(w, s.Board.Edit(DeviceID(r), r.PathValue("id"), body.Text))
+}
+
+func (s *server) delete(w http.ResponseWriter, r *http.Request) {
+	reply(w, s.Board.Delete(DeviceID(r), r.PathValue("id")))
+}
+
+func (s *server) vote(w http.ResponseWriter, r *http.Request) {
+	reply(w, s.Board.Vote(DeviceID(r), r.PathValue("id")))
+}
+
+func (s *server) toggle(set func(id string, on bool) error) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body struct{ On bool }
+		if !decode(w, r, &body) {
+			return
+		}
+		reply(w, set(r.PathValue("id"), body.On))
+	}
+}
+
+func (s *server) highlight(w http.ResponseWriter, r *http.Request) {
+	var body struct{ ID string }
+	if !decode(w, r, &body) {
+		return
+	}
+	reply(w, s.Board.Highlight(body.ID))
+}
+
+func (s *server) export(w http.ResponseWriter, r *http.Request) {
+	now := s.Now()
+	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="savolbor-%s.md"`, now.Format("2006-01-02")))
+	fmt.Fprint(w, qna.ExportMarkdown(s.Board.View("", true), now))
+}
+
+func decode(w http.ResponseWriter, r *http.Request, dst any) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, maxBody)
+	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
+		writeErr(w, http.StatusBadRequest, "bad_request")
+		return false
+	}
+	return true
+}
+
+func reply(w http.ResponseWriter, err error) {
+	if err != nil {
+		writeBoardErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func writeBoardErr(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, qna.ErrEmpty):
+		writeErr(w, http.StatusBadRequest, "empty")
+	case errors.Is(err, qna.ErrTooLong):
+		writeErr(w, http.StatusBadRequest, "too_long")
+	case errors.Is(err, qna.ErrRateLimited):
+		writeErr(w, http.StatusTooManyRequests, "rate_limited")
+	case errors.Is(err, qna.ErrNotFound):
+		writeErr(w, http.StatusNotFound, "not_found")
+	case errors.Is(err, qna.ErrNotOwner):
+		writeErr(w, http.StatusForbidden, "not_owner")
+	case errors.Is(err, qna.ErrAnswered):
+		writeErr(w, http.StatusConflict, "answered")
+	default:
+		slog.Error("board command failed", "err", err)
+		writeErr(w, http.StatusInternalServerError, "internal")
+	}
+}
+
+func writeErr(w http.ResponseWriter, status int, code string) {
+	writeJSON(w, status, map[string]string{"error": code})
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(v)
+}
