@@ -50,6 +50,8 @@ tips:
 | `-port` | `8080` | port to listen on |
 | `-data` | `savolbor-YYYY-MM-DD.jsonl` | event log file |
 | `-public-url` | — | public tunnel url; join url/qr use it and the presenter always needs the key |
+| `-wifi` | — | wi-fi name shown in the terminal, under the qr on the projector and on the print card, so phones on mobile data notice |
+| `-no-open` | off | don't open the presenter page in the browser on start (otherwise `open` / `xdg-open` / `rundll32` is used; with `-public-url` the `?key=` link opens) |
 | `-debug` | off | log every request — if a phone connects and no line appears, its request never reached the laptop |
 
 ## over the internet (when the lan is blocked)

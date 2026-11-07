@@ -26,6 +26,30 @@ import (
 	"savolbor/web"
 )
 
+type options struct {
+	port      int
+	data      string
+	debug     bool
+	publicURL string
+	wifi      string
+	noOpen    bool
+}
+
+func parseOptions(args []string) (*options, error) {
+	o := &options{}
+	fs := flag.NewFlagSet("savolbor", flag.ContinueOnError)
+	fs.IntVar(&o.port, "port", 8080, "port to listen on")
+	fs.StringVar(&o.data, "data", "savolbor-"+time.Now().Format("2006-01-02")+".jsonl", "event log file")
+	fs.BoolVar(&o.debug, "debug", false, "log every request (use when phones can't connect)")
+	fs.StringVar(&o.publicURL, "public-url", "", "public tunnel url (e.g. https://x.trycloudflare.com); presenter then always needs the key")
+	fs.StringVar(&o.wifi, "wifi", "", "wi-fi name to show under the qr, so phones on mobile data notice")
+	fs.BoolVar(&o.noOpen, "no-open", false, "do not open the presenter page in the browser on start")
+	if err := fs.Parse(args); err != nil {
+		return nil, err
+	}
+	return o, nil
+}
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "savolbor:", err)
@@ -34,17 +58,18 @@ func main() {
 }
 
 func run() error {
-	port := flag.Int("port", 8080, "port to listen on")
-	data := flag.String("data", "savolbor-"+time.Now().Format("2006-01-02")+".jsonl", "event log file")
-	debug := flag.Bool("debug", false, "log every request (use when phones can't connect)")
-	publicURL := flag.String("public-url", "", "public tunnel url (e.g. https://x.trycloudflare.com); presenter then always needs the key")
-	wifi := flag.String("wifi", "", "wi-fi name to show under the qr, so phones on mobile data notice")
-	flag.Parse()
-	if *debug {
+	o, err := parseOptions(os.Args[1:])
+	if errors.Is(err, flag.ErrHelp) {
+		return nil // usage was already printed
+	}
+	if err != nil {
+		return err
+	}
+	if o.debug {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
-	log, events, err := store.Open(*data)
+	log, events, err := store.Open(o.data)
 	if err != nil {
 		return fmt.Errorf("open data file: %w", err)
 	}
@@ -69,29 +94,29 @@ func run() error {
 	if best != nil {
 		lanHost = best.String()
 	}
-	joinURL := fmt.Sprintf("http://%s:%d", lanHost, *port)
-	public := *publicURL != ""
+	joinURL := fmt.Sprintf("http://%s:%d", lanHost, o.port)
+	public := o.publicURL != ""
 	if public {
-		if !strings.HasPrefix(*publicURL, "https://") && !strings.HasPrefix(*publicURL, "http://") {
-			return fmt.Errorf("-public-url must start with https:// (got %q)", *publicURL)
+		if !strings.HasPrefix(o.publicURL, "https://") && !strings.HasPrefix(o.publicURL, "http://") {
+			return fmt.Errorf("-public-url must start with https:// (got %q)", o.publicURL)
 		}
-		joinURL = strings.TrimRight(*publicURL, "/")
+		joinURL = strings.TrimRight(o.publicURL, "/")
 	}
 
 	static, err := fs.Sub(web.Dist, "dist")
 	if err != nil {
 		return err
 	}
-	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static, Public: public, Wifi: *wifi})
+	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static, Public: public, Wifi: o.wifi})
 	var handler http.Handler = app
-	if *debug {
+	if o.debug {
 		handler = logRequests(handler)
 	}
 
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", o.port))
 	if err != nil {
 		if errors.Is(err, syscall.EADDRINUSE) {
-			return fmt.Errorf("port %d is already in use — stop the other program or pass -port", *port)
+			return fmt.Errorf("port %d is already in use — stop the other program or pass -port", o.port)
 		}
 		return err
 	}
@@ -105,14 +130,14 @@ func run() error {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all, public, *wifi)
-	if *debug {
+	printBanner(restored, o.data, joinURL, o.port, adminKey, ifaces, all, public, o.wifi)
+	if o.debug {
 		fmt.Println("  debug: logging every request. no log line when a phone connects = it never reached this laptop")
 		fmt.Println()
 	}
 
 	if !public {
-		go watchJoinURL(base, 5*time.Second, joinURL, func() string { return joinURLFor(*port) }, func(u string) {
+		go watchJoinURL(base, 5*time.Second, joinURL, func() string { return joinURLFor(o.port) }, func(u string) {
 			app.SetJoinURL(u)
 			fmt.Printf("\nnetwork changed — participants now join at %s\n  presenter (phone): %s/host?key=%s\n\n", u, u, adminKey)
 			if qr, err := qrcode.New(u, qrcode.Medium); err == nil {
@@ -123,6 +148,11 @@ func run() error {
 
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
+	if !o.noOpen {
+		if err := openBrowser(presenterURL(o.port, adminKey, public)); err != nil {
+			slog.Warn("could not open the browser; open the presenter url above by hand", "err", err)
+		}
+	}
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	select {
