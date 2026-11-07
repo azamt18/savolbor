@@ -202,5 +202,5 @@ func wifiLine(ssid string) string {
 	if ssid == "" {
 		return ""
 	}
-	return fmt.Sprintf("  wi-fi:            %s\n", ssid)
+	return fmt.Sprintf("  wi-fi:             %s\n", ssid)
 }

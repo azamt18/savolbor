@@ -101,3 +101,11 @@ the demo gif (15s: scan qr → ask → vote rises → presenter presses "done, n
 
 - **plan session**: this file, readme drafts (b2), presenter guide (a2), landing page copy, announcement texts.
 - **impl session**: b1 steps 1–8, a1 ui bits, landing page build (b3), each as its own commit with `make test` green, reporting back hash + test result + deviations.
+
+## as built
+
+- **step 1 (2026-11-07)**: `47c7f6d` docs, `d6ee3d0` `-wifi`, `a903d93` print card, `11844c2` first-visit hint, `87b0377` auto-open + `-no-open`. make test green. deviations:
+  - `/host` has no join tab any more, so the print button sits under the qr card below the now panel. the print card is hidden on screen.
+  - the projector shows "Wi-Fi: <name>" under the address in both layouts.
+  - flag parsing moved into `parseOptions(args)` for tests; `-h` now exits 0.
+  - not checked by hand yet: print preview, the wifi/hint layout in a browser, the real browser launch.
