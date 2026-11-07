@@ -307,6 +307,58 @@ products/savolbor/
 
 ---
 
+### Task 9: host polish after review (added 2026-11-07)
+
+**why:** the user reviewed `/host` at 1440×900 with 4 questions:
+
+- "Bosib chiqarish" (print) reads as a negative signal and isn't needed.
+- the selected row is hard to tell apart: only a faint white background and a thin left line, and every row repeats the same two buttons.
+- the right column is out of proportion: it takes ~42% of the width, and the qr card is taller than the now card it should support.
+- the ui has almost no icons. add mature (plain, professional line) icons only where they help: logo, language, and the top-bar actions.
+
+**decisions:**
+
+1. **print goes, qr opens full screen.**
+   - remove the print button, the `.print-card` markup, the `@media print` css and the `printCard` / `sameWifi` keys that only print used. `-wifi` stays (projector, terminal, and now the full-screen qr).
+   - the qr card is a button. clicking it, like opening an image, shows a full-screen overlay on white with:
+     - the qr at ~80vmin
+     - the short url
+     - the wi-fi name, if set
+   - the overlay closes on esc, a click anywhere, or a close button (×) in the corner. focus moves into the overlay and back to the qr card on close. it isn't projector mode: no questions, just the invite.
+   - under the small qr: the short url in muted text, so the card says what it is.
+2. **selected row is unmistakable.**
+   - selected row: lojuvard tint background (`--lojuvard-tint`, lojuvard at ~8% on paper, new token), a 4px full-height lojuvard bar on the left, and the vote tile filled lojuvard with white text.
+   - row actions ("hozir javob beraman", "yashirish", …) show only on the selected row. on pointer devices they also show on hover and `:focus-within`. other rows are text + votes only, so the selection is the one row with buttons.
+   - the now-answering row keeps the zar bar and gets a small "hozir" chip before the text, so "selected" (lojuvard) and "being answered" (zar) never look alike.
+3. **right column proportions.**
+   - grid: `minmax(0, 1fr) minmax(320px, 400px)`. the queue gets the spare width, and the side column stops growing past 400px.
+   - the now card stays first and is the visual lead of the column. the qr card is compact: qr ~200px, url under it.
+   - below 900px nothing changes (one column, now card first).
+4. **icons.**
+   - add to `icons.tsx`, same style as the existing ones: 20px box, stroke 1.75, round caps, `currentColor`, `aria-hidden`, no icon package.
+   - where they go:
+     - logo mark before "Savol bor": a speech bubble with a question mark, in lojuvard.
+     - language toggle: a globe before the uz/en pair.
+     - connected count: a person icon instead of the green dot.
+     - export: download.
+     - projector: screen.
+     - "tayyor, keyingisi" (done, next): check.
+     - qr card: expand corner icon, top right.
+   - icons always sit next to their text label; no icon-only buttons except the overlay's ×, which gets an `aria-label`.
+   - the same logo mark and globe on the participant page header, so both pages stay one app (task 8).
+   - not added: row buttons, tabs, vote tile. they're already clear, and icons there would be noise.
+
+**files:** `ui/src/icons.tsx`, `ui/src/LangToggle.tsx`, `ui/src/tokens.css`, `ui/src/shared.css`, `ui/src/host/JoinCard.tsx` (+ test), `ui/src/host/Queue.tsx`, `ui/src/host/host.css`, `ui/src/host/HostApp.tsx`, `ui/src/participant/*` header, `ui/src/i18n.ts`, `web/dist`, README (`-wifi` row: drop "print card").
+
+**steps:**
+
+1. tests first:
+   - join card: click opens a dialog showing the url and wi-fi; esc closes it; there is no print button.
+   - queue: action buttons render only for the selected row; the now row has the "hozir" chip.
+2. build 1–4. keep every control 44px tall (task 8).
+3. visual check at 1440×900 and 390×844 with 4+ questions: selection obvious at a glance, side column ≤ 400px, overlay qr scannable from a phone 3m away.
+4. commits: `fix(savolbor): full-screen qr instead of print` and `feat(savolbor): clearer selection, side column, icons`. `make test` green on each.
+
 ## as built
 
 decisions taken during execution that differ from the text above:

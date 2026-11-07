@@ -27,8 +27,8 @@ track a ships first (it's the next workshop). track b builds on it.
 
 ### a1. joining (participants)
 
-- **join card**: projector mode already shows the qr; for tables and walls add a **print** button on `/host` (join tab) that prints the qr, the short url and one line "telefoningiz shu wi-fi'ga ulangan bo'lsin" / "join the same wi-fi". css `@media print`, no new endpoint.
-- **wi-fi name on the card**: optional `-wifi "<ssid>"` flag; shown under the qr on projector, print card and terminal. the most common failure in a room is a phone on mobile data.
+- **join card**: ~~print button~~ dropped 2026-11-07 after review (reads as a negative signal). clicking the qr card opens it full screen instead; see plan-redesign.md task 9.
+- **wi-fi name on the card**: optional `-wifi "<ssid>"` flag; shown under the qr on projector, the full-screen qr and terminal. the most common failure in a room is a phone on mobile data.
 - **first-visit hint** on the phone: one dismissible line above the list, "savolingizni yozing, boshqalarning savoliga ovoz bering" / "ask, and upvote others". stored in localStorage.
 
 ### a2. attendees who want to run it (trainers)
@@ -51,7 +51,7 @@ track a ships first (it's the next workshop). track b builds on it.
 3. add `LICENSE` (mit), `.goreleaser.yaml`, `.github/workflows/release.yml` (tag `v*` → goreleaser), `.github/workflows/test.yml` (push/pr → `make test`).
 4. `-no-open` flag + auto-open browser on start (`open` / `xdg-open` / `rundll32 url.dll,FileProtocolHandler`). test: flag parsing and the command chosen per `runtime.GOOS`, without actually launching.
 5. `-wifi` flag (track a1). test: shown in `/api/view` and the banner.
-6. print button + `@media print` on `/host` join tab.
+6. ~~print button~~ replaced by the full-screen qr (plan-redesign.md task 9).
 7. tag `v0.1.0`; check the release page has 5 archives + checksums; download the macos one on a clean user account and run it.
 8. homebrew tap repo `azamt18/homebrew-tap`, formula filled by goreleaser.
 
