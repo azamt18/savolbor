@@ -37,6 +37,7 @@ func run() error {
 	port := flag.Int("port", 8080, "port to listen on")
 	data := flag.String("data", "savolbor-"+time.Now().Format("2006-01-02")+".jsonl", "event log file")
 	debug := flag.Bool("debug", false, "log every request (use when phones can't connect)")
+	publicURL := flag.String("public-url", "", "public tunnel url (e.g. https://x.trycloudflare.com); presenter then always needs the key")
 	flag.Parse()
 	if *debug {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
@@ -68,12 +69,19 @@ func run() error {
 		lanHost = best.String()
 	}
 	joinURL := fmt.Sprintf("http://%s:%d", lanHost, *port)
+	public := *publicURL != ""
+	if public {
+		if !strings.HasPrefix(*publicURL, "https://") && !strings.HasPrefix(*publicURL, "http://") {
+			return fmt.Errorf("-public-url must start with https:// (got %q)", *publicURL)
+		}
+		joinURL = strings.TrimRight(*publicURL, "/")
+	}
 
 	static, err := fs.Sub(web.Static, "static")
 	if err != nil {
 		return err
 	}
-	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static})
+	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static, Public: public})
 	var handler http.Handler = app
 	if *debug {
 		handler = logRequests(handler)
@@ -96,19 +104,21 @@ func run() error {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all)
+	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all, public)
 	if *debug {
 		fmt.Println("  debug: logging every request. no log line when a phone connects = it never reached this laptop")
 		fmt.Println()
 	}
 
-	go watchJoinURL(base, 5*time.Second, joinURL, func() string { return joinURLFor(*port) }, func(u string) {
-		app.SetJoinURL(u)
-		fmt.Printf("\nnetwork changed — participants now join at %s\n  presenter (phone): %s/host?key=%s\n\n", u, u, adminKey)
-		if qr, err := qrcode.New(u, qrcode.Medium); err == nil {
-			fmt.Println(qr.ToSmallString(false))
-		}
-	})
+	if !public {
+		go watchJoinURL(base, 5*time.Second, joinURL, func() string { return joinURLFor(*port) }, func(u string) {
+			app.SetJoinURL(u)
+			fmt.Printf("\nnetwork changed — participants now join at %s\n  presenter (phone): %s/host?key=%s\n\n", u, u, adminKey)
+			if qr, err := qrcode.New(u, qrcode.Medium); err == nil {
+				fmt.Println(qr.ToSmallString(false))
+			}
+		})
+	}
 
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
@@ -126,13 +136,21 @@ func run() error {
 	return srv.Shutdown(ctx)
 }
 
-func printBanner(restored int, data, joinURL string, port int, adminKey string, ifaces []ifaceAddrs, all []net.IP) {
+func printBanner(restored int, data, joinURL string, port int, adminKey string, ifaces []ifaceAddrs, all []net.IP, public bool) {
 	fmt.Printf("savolbor is running — %d questions restored from %s\n\n", restored, data)
 	fmt.Printf("  participants:      %s\n", joinURL)
-	fmt.Printf("  presenter:         http://localhost:%d/host\n", port)
+	if public {
+		fmt.Printf("  presenter:         http://localhost:%d/host?key=%s\n", port, adminKey)
+	} else {
+		fmt.Printf("  presenter:         http://localhost:%d/host\n", port)
+	}
 	fmt.Printf("  presenter (phone): %s/host?key=%s\n\n", joinURL, adminKey)
 	if qr, err := qrcode.New(joinURL, qrcode.Medium); err == nil {
 		fmt.Println(qr.ToSmallString(false))
+	}
+	if public {
+		fmt.Println("  public mode: anyone with the url can ask — stop the tunnel after the workshop")
+		return
 	}
 	if len(all) == 0 {
 		fmt.Println("  no lan address found — connect to wi-fi or turn on a hotspot, then restart")

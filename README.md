@@ -34,7 +34,21 @@ tips:
 |---|---|---|
 | `-port` | `8080` | port to listen on |
 | `-data` | `savolbor-YYYY-MM-DD.jsonl` | event log file |
+| `-public-url` | — | public tunnel url; join url/qr use it and the presenter always needs the key |
 | `-debug` | off | log every request — if a phone connects and no line appears, its request never reached the laptop |
+
+## over the internet (when the lan is blocked)
+
+if phones can't reach the laptop (corporate vpn, client isolation), expose it through a tunnel for the length of the workshop:
+
+```bash
+cloudflared tunnel --url http://localhost:8080      # prints https://<random>.trycloudflare.com
+./savolbor -public-url https://<random>.trycloudflare.com
+```
+
+- in public mode the laptop is **not** trusted automatically: open the `presenter` link with `?key=` printed at startup.
+- requests that arrive through any proxy (`x-forwarded-for`, `cf-connecting-ip`, …) never count as the presenter, even without `-public-url`.
+- anyone with the url can post. stop the tunnel (ctrl+c) when the session ends. check your company's policy before tunnelling from a work laptop.
 
 ## data and export
 

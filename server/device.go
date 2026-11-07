@@ -39,12 +39,10 @@ func DeviceID(r *http.Request) string {
 }
 
 // IsHost reports whether the request comes from the presenter: the laptop
-// itself, or any device holding the admin key.
-func IsHost(r *http.Request, adminKey string) bool {
-	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
-		if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
-			return true
-		}
+// itself (when trustLoopback is set), or any device holding the admin key.
+func IsHost(r *http.Request, adminKey string, trustLoopback bool) bool {
+	if trustLoopback && fromLocalBrowser(r) {
+		return true
 	}
 	key := r.URL.Query().Get("key")
 	if key == "" {
@@ -53,6 +51,24 @@ func IsHost(r *http.Request, adminKey string) bool {
 		}
 	}
 	return adminKey != "" && subtle.ConstantTimeCompare([]byte(key), []byte(adminKey)) == 1
+}
+
+// proxyHeaders mark a request relayed by a tunnel or reverse proxy (ngrok,
+// cloudflared, …). Those arrive from loopback but come from the internet.
+var proxyHeaders = []string{"X-Forwarded-For", "Forwarded", "Cf-Connecting-Ip", "X-Real-Ip"}
+
+func fromLocalBrowser(r *http.Request) bool {
+	for _, h := range proxyHeaders {
+		if r.Header.Get(h) != "" {
+			return false
+		}
+	}
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return false
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func setCookie(w http.ResponseWriter, name, value string) {

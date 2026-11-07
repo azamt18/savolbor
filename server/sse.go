@@ -13,7 +13,7 @@ const pingEvery = 25 * time.Second
 // Phones that sleep or drop wi-fi reconnect and get a fresh snapshot.
 func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 	host := r.URL.Query().Get("view") == "host"
-	if host && !IsHost(r, s.AdminKey) {
+	if host && !IsHost(r, s.AdminKey, !s.Public) {
 		writeErr(w, http.StatusForbidden, "forbidden")
 		return
 	}

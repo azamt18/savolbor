@@ -24,6 +24,7 @@ type Config struct {
 	JoinURL  string           // initial value; see SetJoinURL
 	Static   fs.FS            // web.Static sub-tree "static"
 	Now      func() time.Time // export date; defaults to time.Now
+	Public   bool             // reachable from the internet: loopback no longer implies host
 }
 
 type Server struct {
@@ -116,7 +117,7 @@ func (s *Server) page(name string) http.HandlerFunc {
 }
 
 func (s *Server) hostPage(w http.ResponseWriter, r *http.Request) {
-	if !IsHost(r, s.AdminKey) {
+	if !IsHost(r, s.AdminKey, !s.Public) {
 		writeErr(w, http.StatusForbidden, "forbidden")
 		return
 	}
@@ -130,7 +131,7 @@ func (s *Server) hostPage(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) host(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !IsHost(r, s.AdminKey) {
+		if !IsHost(r, s.AdminKey, !s.Public) {
 			writeErr(w, http.StatusForbidden, "forbidden")
 			return
 		}
