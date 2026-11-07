@@ -1,6 +1,59 @@
 # savolbor
 
-live q&a for workshops, lessons and seminars. participants send and upvote questions from their phones; the presenter sees, sorts and moderates them on the laptop and puts them on the projector. everything runs on the local network — **no internet needed**.
+live q&a for workshops, lessons and seminars. participants send and upvote questions from their phones; the presenter sees, sorts and moderates them on the laptop and puts them on the projector. it runs on one laptop, as a single program. on the same wi-fi it needs no internet; for phones on other networks it can open a public link.
+
+## start (no install)
+
+two ways to run it. both give you the presenter page on your laptop and a qr code for phones. the commands below are for a mac with apple silicon (m1 or newer); other laptops are in the table at the end.
+
+### a. phones anywhere (public link) — recommended
+
+works on any network, even phones on mobile data. paste this into **terminal** (cmd+space, type `terminal`):
+
+```bash
+cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-darwin-arm64.zip && unzip -oq savolbor-darwin-arm64.zip && cd savolbor-darwin-arm64 && ./workshop.sh --public
+```
+
+that one line downloads savolbor, downloads the tunnel tool (cloudflared, first run only) and starts everything. then:
+
+1. the presenter page opens in your browser by itself. if it doesn't, open the `presenter` link the terminal prints (it ends with `?key=…`).
+2. press **projector** (or `p`) and put it on the big screen. people scan the qr code. click the qr card for a full-screen code.
+3. when you finish, press **ctrl+c** in the terminal. this closes the public link. anyone with the link can ask questions until then.
+
+next time (the files are already there):
+
+```bash
+cd ~/Downloads/savolbor-darwin-arm64 && ./workshop.sh --public
+```
+
+the public link is new on every start, so the qr code changes too. questions are saved in `~/savolbor-YYYY-MM-DD.jsonl`; starting again the same day restores them.
+
+### b. same wi-fi only, no tunnel
+
+phones must be on the same wi-fi as the laptop. same download, different last command:
+
+```bash
+cd ~/Downloads && curl -LO https://github.com/azamt18/savolbor/releases/latest/download/savolbor-darwin-arm64.zip && unzip -oq savolbor-darwin-arm64.zip && cd savolbor-darwin-arm64 && ./workshop.sh
+```
+
+the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect. add your wi-fi name so people on mobile data notice they must switch: `./savolbor -wifi "venue wifi"` instead of `./workshop.sh`.
+
+### other laptops
+
+| laptop | file (same link, other name) | start |
+|---|---|---|
+| mac, apple silicon | `savolbor-darwin-arm64.zip` | `./workshop.sh --public` |
+| mac, intel | `savolbor-darwin-amd64.zip` | `./workshop.sh --public` |
+| linux | `savolbor-linux-amd64.zip` | `./workshop.sh --public` |
+| windows | `savolbor-windows-amd64.zip` | same wi-fi only: in powershell, `.\savolbor.exe -wifi "venue wifi"`; allow **private networks** in the firewall prompt, and choose *more info*, then *run anyway* if smartscreen blocks it. for a public link on windows, install [cloudflared](https://github.com/cloudflare/cloudflared/releases) and see *over the internet* below |
+
+download page for all files: https://github.com/azamt18/savolbor/releases/latest
+
+if something doesn't work: phones can't open the link → see *run in a room* below (vpn, firewall, client isolation).
+
+---
+
+# for engineers
 
 ## build
 
@@ -24,54 +77,6 @@ make build      # npm ci + vite build into web/dist, then go build
 ```
 
 ctrl+c stops everything. `PORT=8081 ./workshop.sh` picks another port; data goes to `~/savolbor-YYYY-MM-DD.jsonl` (override with `DATA=…`).
-
-## run a downloaded build
-
-for someone who only needs to run it (a moderator, a co-presenter) — no go, no node, nothing to install. `make release` builds one zip per platform into `dist/`:
-
-| zip | laptop |
-|---|---|
-| `savolbor-darwin-arm64.zip` | mac, apple silicon (m1 or newer) |
-| `savolbor-darwin-amd64.zip` | mac, intel |
-| `savolbor-windows-amd64.zip` | windows |
-| `savolbor-linux-amd64.zip` | linux |
-
-unzip it, open a terminal in the unzipped folder and start it. use your wi-fi name for `-wifi`; phones show it so people on mobile data notice they must switch.
-
-**mac** (a file that arrived by chat or email is quarantined, so clear that once):
-
-```bash
-cd ~/Downloads/savolbor-darwin-arm64
-xattr -d com.apple.quarantine savolbor
-chmod +x savolbor
-./savolbor -wifi "venue wifi"
-```
-
-**windows** (powershell):
-
-```powershell
-cd $HOME\Downloads\savolbor-windows-amd64
-.\savolbor.exe -wifi "venue wifi"
-```
-
-if smartscreen says "windows protected your pc", choose *more info*, then *run anyway*. the first start asks for firewall access: allow **private networks**, otherwise phones can't connect.
-
-**linux**:
-
-```bash
-cd ~/Downloads/savolbor-linux-amd64
-chmod +x savolbor
-./savolbor -wifi "venue wifi"
-```
-
-what happens next:
-
-1. the presenter page (`/host`) opens in the browser by itself.
-2. the terminal prints the phone address and a qr code. phones must be on the same wi-fi.
-3. press **projector** (or `p`) to put the qr on the big screen. click the qr card for a full-screen code.
-4. ctrl+c stops it. questions are saved next to the program in `savolbor-YYYY-MM-DD.jsonl`, so starting it again the same day restores them.
-
-check before the session: open the phone address on a phone. if nothing loads, see the tips under *run in a room* (firewall, vpn, client isolation).
 
 ## run in a room
 
