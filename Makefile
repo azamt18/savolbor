@@ -21,7 +21,7 @@ dev:
 
 # sample questions in a throwaway log on :8099, to look at the ui
 seed: build
-	@lsof -ti tcp:8099 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8099 is busy"; exit 1; } || true
+	@lsof -ti tcp:8099 -sTCP:LISTEN | xargs kill 2>/dev/null; sleep 0.5; true
 	@rm -f /tmp/savolbor-demo.jsonl
 	@./savolbor -port 8099 -data /tmp/savolbor-demo.jsonl -no-open >/dev/null 2>&1 & \
 	  sleep 1; dev/seed.sh 8099; echo "open http://localhost:8099/host — stop it: lsof -ti tcp:8099 -sTCP:LISTEN | xargs kill"

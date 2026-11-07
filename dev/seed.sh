@@ -34,18 +34,18 @@ host() { curl -fsS -X POST "$BASE/api/host/$1" -H 'content-type: application/jso
 
 curl -fsS "$BASE/api/view" >/dev/null || { echo "no savolbor on $BASE" >&2; exit 1; }
 
-host title '{"title":"Agentlar haqida workshop"}'
+host title '{"title":"Plov pishirish darsi"}'
 
-q=$(ask ali Ali "Agent va oddiy chatbot orasidagi farq nima?");          vote "$q" 6
-q=$(ask madina Madina "Agentlar xotirani qanday saqlaydi?");              vote "$q" 5
-q=$(ask jasur Jasur "Ishlab chiqarishda agentni qanday sinab koʻramiz?"); vote "$q" 4
-q=$(ask anon "" "Qaysi model arzonroq va yetarlicha yaxshi?");            vote "$q" 3
-q=$(ask dilnoza Dilnoza "Agent xato qilsa, kim javobgar?");               vote "$q" 2
-q=$(ask sardor Sardor "Oʻzbek tilida yaxshi ishlaydimi?");                vote "$q" 2
-q=$(ask nigora Nigora "Slaydlarni qayerdan olsak boʻladi?");              vote "$q" 1
-q=$(ask bobur "" "Kodni koʻrsatib berasizmi?")
+q=$(ask ali Ali "Plov uchun qaysi guruch yaxshi?");                       vote "$q" 6
+q=$(ask madina Madina "Zirvakni necha daqiqa qovurish kerak?");           vote "$q" 5
+q=$(ask jasur Jasur "Sabzini qanday toʻgʻrash kerak?");                   vote "$q" 4
+q=$(ask anon "" "Qozon oʻrniga oddiy kastryulkada boʻladimi?");           vote "$q" 3
+q=$(ask dilnoza Dilnoza "Goʻsht qachon solinadi?");                       vote "$q" 2
+q=$(ask sardor Sardor "Piyoz qancha kerak?");                             vote "$q" 2
+q=$(ask nigora Nigora "Retseptni qayerdan olsak boʻladi?");               vote "$q" 1
+q=$(ask bobur "" "Olovni qanday sozlaymiz?")
 
-done_q=$(ask ali Ali "Dastur bepulmi?"); vote "$done_q" 3
+done_q=$(ask ali Ali "Plov necha kishiga yetadi?"); vote "$done_q" 3
 host "questions/$done_q/answered" '{"on":true}'
 
 spam=$(ask anon "" "test test")
