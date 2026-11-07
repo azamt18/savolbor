@@ -19,3 +19,9 @@ test("uzbek uses the modifier letter turned comma", () => {
 test("format fills vars", () => {
   expect(format("{n} ta, {m}", { n: 3, m: "x" })).toBe("3 ta, x");
 });
+
+test("errorKey falls back to internal", async () => {
+  const { errorKey } = await import("./i18n");
+  expect(errorKey("not_found")).toBe("err_not_found");
+  expect(errorKey("weird")).toBe("err_internal");
+});

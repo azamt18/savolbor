@@ -24,7 +24,7 @@
   --paper: #F7F8FA;
   --surface: #FFFFFF;
   --ink: #16203A;
-  --muted: #6B7489;
+  --muted: #646D82; /* plan: #6B7489, darkened to pass aa on --paper (4.41 → 4.88) */
   --line: #E3E6ED;
   --lojuvard: #2448A8;
   --firuza: #0E9F8E;

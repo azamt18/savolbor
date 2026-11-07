@@ -1,1 +1,0 @@
-import{i as e,n as t,r as n,t as r}from"./jsx-runtime-Dd-lcDnJ.js";var i=e(),a=n(),o=r();function s(){let{t:e}=t();return(0,o.jsx)(`h1`,{style:{fontWeight:600,padding:16},children:e(`title`)})}(0,a.createRoot)(document.getElementById(`root`)).render((0,o.jsx)(i.StrictMode,{children:(0,o.jsx)(s,{})}));

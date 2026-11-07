@@ -166,6 +166,12 @@ export function translate(l: Lang, key: Key, vars?: Record<string, string | numb
   return format(dict[l][key] ?? dict.uz[key] ?? key, vars);
 }
 
+// errorKey maps a server error code to its message, unknown codes to internal.
+export function errorKey(code: string): Key {
+  const k = ("err_" + code) as Key;
+  return k in uz ? k : "err_internal";
+}
+
 export function useT() {
   const l = useSyncExternalStore(subscribe, () => lang);
   return {
