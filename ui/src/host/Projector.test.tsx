@@ -44,3 +44,44 @@ test("hidden highlight falls back to the invite", () => {
   render(<Projector view={view([h], { highlighted: h.id })} />);
   expect(screen.getByText("Got a question?")).toBeTruthy();
 });
+
+import { act, fireEvent } from "@testing-library/react";
+
+describe("controls", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  const setup = (highlight: boolean) => {
+    const cur = q({ text: "now" });
+    const handlers = { onExit: vi.fn(), onNext: vi.fn(), onHide: vi.fn() };
+    render(<Projector view={view([cur, q()], { highlighted: highlight ? cur.id : "" })} {...handlers} />);
+    return { cur, ...handlers };
+  };
+  const bar = () => document.querySelector(".pj-controls")!;
+
+  test("visible when the projector opens, hidden after 3s idle, back on mouse move", () => {
+    setup(true);
+    expect(bar().classList.contains("is-shown")).toBe(true);
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(bar().classList.contains("is-shown")).toBe(false);
+    fireEvent.mouseMove(document);
+    expect(bar().classList.contains("is-shown")).toBe(true);
+  });
+
+  test("exit, done-next and hide buttons call their handlers", () => {
+    const { cur, onExit, onNext, onHide } = setup(true);
+    fireEvent.click(screen.getByRole("button", { name: /exit projector/i }));
+    fireEvent.click(screen.getByRole("button", { name: /done, next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^hide/i }));
+    expect(onExit).toHaveBeenCalled();
+    expect(onNext).toHaveBeenCalled();
+    expect(onHide).toHaveBeenCalledWith(cur.id);
+  });
+
+  test("invite offers answer-now instead of done-next and no hide", () => {
+    setup(false);
+    expect(screen.getByRole("button", { name: /answer now/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /done, next/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^hide/i })).toBeNull();
+  });
+});

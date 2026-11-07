@@ -110,7 +110,9 @@ export function HostApp() {
       </main>
 
       <footer className="hfoot">{t("shortcuts")}</footer>
-      {projector && view && <Projector view={view} onExit={() => setProjector(false)} />}
+      {projector && view && (
+        <Projector view={view} onExit={() => setProjector(false)} onNext={next} onHide={(id) => hide(id, true)} />
+      )}
     </div>
   );
 }

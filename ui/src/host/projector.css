@@ -67,14 +67,35 @@ body.is-projector .projector { display: flex; }
 .pj-scan { margin: 0; font-size: clamp(1rem, 1.6vw, 1.75rem); color: var(--muted); }
 .pj-url { margin: 0; font-size: clamp(1.75rem, 3.2vw, 3.5rem); font-weight: 600; overflow-wrap: anywhere; }
 
-/* visible only to the presenter's mouse or keyboard, never to the room */
-.pj-exit {
-  position: fixed; top: 16px; right: 16px;
-  min-height: 40px; padding: 0 14px;
-  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+/* presenter controls: shown while the mouse or keyboard is in use, hidden
+   when idle so the room never sees them */
+.pj-controls {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 11;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--ink);
+  border-radius: 14px;
+  transform: translateX(-50%);
   opacity: 0;
+  pointer-events: none;
 }
-.pj-exit:hover, .pj-exit:focus-visible { opacity: 1; }
+.pj-controls.is-shown, .pj-controls:focus-within { opacity: 1; pointer-events: auto; }
+.pj-controls button {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: var(--tap); padding: 0 16px;
+  border: 0; border-radius: 8px;
+  background: none; color: var(--paper); font-size: var(--fs-m); white-space: nowrap;
+}
+.pj-controls button:hover { background: #26304A; }
+.pj-controls button.primary { background: var(--lojuvard); color: #fff; font-weight: 600; }
+.pj-controls kbd { border-color: #4A5578; color: #C9D0E0; }
+@media (prefers-reduced-motion: no-preference) {
+  .pj-controls { transition: opacity .2s; }
+}
 
 /* the page's one orchestrated motion: a new highlight rises in */
 @media (prefers-reduced-motion: no-preference) {
