@@ -55,6 +55,13 @@ test("j/k moves selection and enter highlights", async () => {
   expect(calls()).toContain(`POST /api/host/highlight {"id":"${b.id}"}`);
 });
 
+test("clicking a queue row makes it the current question", async () => {
+  mockBoard(view([a, b]));
+  render(<HostApp />);
+  await act(async () => { fireEvent.click(screen.getByText("second")); });
+  expect(calls()).toContain(`POST /api/host/highlight {"id":"${b.id}"}`);
+});
+
 test("x hides the selected question", async () => {
   mockBoard(view([a, b]));
   render(<HostApp />);

@@ -13,7 +13,7 @@ function setup(over: Partial<Parameters<typeof Queue>[0]> = {}) {
     <Queue
       tab="queue" setTab={noop} counts={{ queue: 3, answered: 0, hidden: 0 }}
       list={rows} selected={rows[1].id} now={Date.now()}
-      onSelect={noop} onAnswerNow={noop} onAnswered={noop} onHidden={noop}
+      onSelect={noop} onAnswered={noop} onHidden={noop}
       {...over}
     />,
   );
@@ -24,7 +24,7 @@ const rowOf = (text: string) => screen.getByText(text).closest("li")!;
 test("action buttons render only on the selected row", () => {
   setup();
   expect(within(rowOf("second")).getByRole("button", { name: "Hide" })).toBeTruthy();
-  expect(within(rowOf("second")).getByRole("button", { name: "Answer now" })).toBeTruthy();
+  expect(within(rowOf("second")).queryByRole("button", { name: "Answer now" })).toBeNull();
   expect(within(rowOf("first")).queryByRole("button")).toBeNull();
   expect(within(rowOf("third")).queryByRole("button")).toBeNull();
 });

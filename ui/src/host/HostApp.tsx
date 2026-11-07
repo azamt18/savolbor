@@ -54,6 +54,12 @@ export function HostApp() {
     document.getElementById("h-" + next.id)?.scrollIntoView?.({ block: "nearest" });
   };
 
+  // picking a row in the queue puts it in the now panel; other tabs only select
+  const select = (id: string) => {
+    setSelected(id);
+    if (tab === "queue" && id !== current?.id) answerNow(id);
+  };
+
   const next = () => run(() => api.next());
   const answerNow = (id: string) => run(() => api.highlight(id));
   const hide = (id: string, on: boolean) => run(() => api.hidden(id, on));
@@ -108,8 +114,7 @@ export function HostApp() {
           selected={sel}
           highlighted={current?.id}
           now={now}
-          onSelect={setSelected}
-          onAnswerNow={answerNow}
+          onSelect={select}
           onAnswered={answered}
           onHidden={hide}
         />

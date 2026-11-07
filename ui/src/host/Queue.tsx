@@ -14,7 +14,6 @@ type Props = {
   highlighted?: string;
   now: number;
   onSelect(id: string): void;
-  onAnswerNow(id: string): void;
   onAnswered(id: string, on: boolean): void;
   onHidden(id: string, on: boolean): void;
 };
@@ -63,9 +62,6 @@ export function Queue(p: Props) {
             <div className="hactions" onClick={(e) => e.stopPropagation()}>
               {(q.id === p.selected || q.id === hover) && p.tab === "queue" && (
                 <>
-                  {q.id !== p.highlighted && (
-                    <button type="button" className="btn" onClick={() => p.onAnswerNow(q.id)}>{t("answerNow")}</button>
-                  )}
                   <button type="button" className="btn" onClick={() => p.onHidden(q.id, true)}>{t("hide")}</button>
                 </>
               )}
