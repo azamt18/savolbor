@@ -25,6 +25,54 @@ make build      # npm ci + vite build into web/dist, then go build
 
 ctrl+c stops everything. `PORT=8081 ./workshop.sh` picks another port; data goes to `~/savolbor-YYYY-MM-DD.jsonl` (override with `DATA=…`).
 
+## run a downloaded build
+
+for someone who only needs to run it (a moderator, a co-presenter) — no go, no node, nothing to install. `make release` builds one zip per platform into `dist/`:
+
+| zip | laptop |
+|---|---|
+| `savolbor-darwin-arm64.zip` | mac, apple silicon (m1 or newer) |
+| `savolbor-darwin-amd64.zip` | mac, intel |
+| `savolbor-windows-amd64.zip` | windows |
+| `savolbor-linux-amd64.zip` | linux |
+
+unzip it, open a terminal in the unzipped folder and start it. use your wi-fi name for `-wifi`; phones show it so people on mobile data notice they must switch.
+
+**mac** (a file that arrived by chat or email is quarantined, so clear that once):
+
+```bash
+cd ~/Downloads/savolbor-darwin-arm64
+xattr -d com.apple.quarantine savolbor
+chmod +x savolbor
+./savolbor -wifi "venue wifi"
+```
+
+**windows** (powershell):
+
+```powershell
+cd $HOME\Downloads\savolbor-windows-amd64
+.\savolbor.exe -wifi "venue wifi"
+```
+
+if smartscreen says "windows protected your pc", choose *more info*, then *run anyway*. the first start asks for firewall access: allow **private networks**, otherwise phones can't connect.
+
+**linux**:
+
+```bash
+cd ~/Downloads/savolbor-linux-amd64
+chmod +x savolbor
+./savolbor -wifi "venue wifi"
+```
+
+what happens next:
+
+1. the presenter page (`/host`) opens in the browser by itself.
+2. the terminal prints the phone address and a qr code. phones must be on the same wi-fi.
+3. press **projector** (or `p`) to put the qr on the big screen. click the qr card for a full-screen code.
+4. ctrl+c stops it. questions are saved next to the program in `savolbor-YYYY-MM-DD.jsonl`, so starting it again the same day restores them.
+
+check before the session: open the phone address on a phone. if nothing loads, see the tips under *run in a room* (firewall, vpn, client isolation).
+
 ## run in a room
 
 1. connect the laptop to the venue wi-fi (or turn on a hotspot / travel router).

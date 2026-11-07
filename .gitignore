@@ -1,3 +1,4 @@
 savolbor
 *.jsonl
 ui/node_modules
+dist/
