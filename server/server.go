@@ -34,15 +34,17 @@ type Server struct {
 	mu      sync.RWMutex
 	joinURL string
 	qr      []byte
-	// joinSubs get a signal when the join url changes, like board subscribers
-	joinSubs map[chan struct{}]struct{}
+	// pokeSubs get a signal when something outside the board changes (join
+	// url, connected count), like board subscribers
+	pokeSubs map[chan struct{}]struct{}
+	presence *presence
 }
 
 func New(cfg Config) *Server {
 	if cfg.Now == nil {
 		cfg.Now = time.Now
 	}
-	s := &Server{Config: cfg, joinSubs: map[chan struct{}]struct{}{}}
+	s := &Server{Config: cfg, pokeSubs: map[chan struct{}]struct{}{}, presence: newPresence()}
 	s.SetJoinURL(cfg.JoinURL)
 
 	mux := http.NewServeMux()
@@ -61,6 +63,8 @@ func New(cfg Config) *Server {
 	mux.HandleFunc("POST /api/host/questions/{id}/answered", s.host(s.toggle(cfg.Board.SetAnswered)))
 	mux.HandleFunc("POST /api/host/questions/{id}/hidden", s.host(s.toggle(cfg.Board.SetHidden)))
 	mux.HandleFunc("POST /api/host/highlight", s.host(s.highlight))
+	mux.HandleFunc("POST /api/host/title", s.host(s.title))
+	mux.HandleFunc("POST /api/host/next", s.host(s.next))
 	mux.HandleFunc("GET /api/host/export.md", s.host(s.export))
 	// loopback counts as host, so a page open in the presenter's browser must
 	// not be able to post to localhost on their behalf
@@ -82,9 +86,16 @@ func (s *Server) SetJoinURL(url string) {
 		slog.Warn("qr code", "url", url, "err", err)
 	}
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.joinURL, s.qr = url, png
-	for ch := range s.joinSubs {
+	s.mu.Unlock()
+	s.pokeAll()
+}
+
+// pokeAll makes every open stream send a fresh snapshot.
+func (s *Server) pokeAll() {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for ch := range s.pokeSubs {
 		select {
 		case ch <- struct{}{}:
 		default:
@@ -98,14 +109,14 @@ func (s *Server) join() (string, []byte) {
 	return s.joinURL, s.qr
 }
 
-func (s *Server) subscribeJoin() (<-chan struct{}, func()) {
+func (s *Server) subscribePokes() (<-chan struct{}, func()) {
 	ch := make(chan struct{}, 1)
 	s.mu.Lock()
-	s.joinSubs[ch] = struct{}{}
+	s.pokeSubs[ch] = struct{}{}
 	s.mu.Unlock()
 	return ch, func() {
 		s.mu.Lock()
-		delete(s.joinSubs, ch)
+		delete(s.pokeSubs, ch)
 		s.mu.Unlock()
 	}
 }
@@ -196,6 +207,23 @@ func (s *Server) highlight(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, s.Board.Highlight(body.ID))
+}
+
+func (s *Server) title(w http.ResponseWriter, r *http.Request) {
+	var body struct{ Title string }
+	if !decode(w, r, &body) {
+		return
+	}
+	reply(w, s.Board.SetTitle(body.Title))
+}
+
+func (s *Server) next(w http.ResponseWriter, r *http.Request) {
+	id, err := s.Board.Next()
+	if err != nil {
+		writeBoardErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"id": id})
 }
 
 func (s *Server) export(w http.ResponseWriter, r *http.Request) {

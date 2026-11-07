@@ -13,6 +13,7 @@ const (
 	EvAnswer    EventType = "answer"
 	EvHide      EventType = "hide"
 	EvHighlight EventType = "highlight"
+	EvTitle     EventType = "title" // Text = new title, "" clears
 )
 
 // Event is one change to the board. It is the unit written to the log and

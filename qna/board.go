@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	MaxTextLen = 280
-	MaxNameLen = 40
+	MaxTextLen  = 280
+	MaxNameLen  = 40
+	MaxTitleLen = 80
 )
 
 type question struct {
@@ -36,6 +37,7 @@ type Board struct {
 	questions   map[string]*question
 	order       []string
 	highlighted string
+	title       string
 	subs        map[int]chan struct{}
 	nextSub     int
 }
@@ -67,6 +69,9 @@ func (b *Board) apply(e Event) error {
 		return nil
 	case EvHighlight:
 		b.highlighted = e.QID
+		return nil
+	case EvTitle:
+		b.title = e.Text
 		return nil
 	}
 	q, ok := b.questions[e.QID]
@@ -109,20 +114,29 @@ func (b *Board) exec(check func(now time.Time) (*Event, error)) error {
 	if err != nil || e == nil {
 		return err
 	}
+	if err := b.record(e, now); err != nil {
+		return err
+	}
+	b.notify()
+	return nil
+}
+
+// record commits and applies one event; the caller holds the lock.
+func (b *Board) record(e *Event, now time.Time) error {
 	e.At = now
 	if err := b.commit(*e); err != nil {
 		return err
 	}
-	if err := b.apply(*e); err != nil {
-		return err
-	}
+	return b.apply(*e)
+}
+
+func (b *Board) notify() {
 	for _, ch := range b.subs {
 		select {
 		case ch <- struct{}{}:
 		default:
 		}
 	}
-	return nil
 }
 
 // visible returns a question participants may act on.
@@ -244,6 +258,46 @@ func (b *Board) Highlight(id string) error {
 		}
 		return &Event{Type: EvHighlight, QID: id, Device: HostDevice}, nil
 	})
+}
+
+// SetTitle names the session; "" clears it.
+func (b *Board) SetTitle(title string) error {
+	return b.exec(func(time.Time) (*Event, error) {
+		title, err := cleanText(title, MaxTitleLen, false)
+		if err != nil {
+			return nil, err
+		}
+		return &Event{Type: EvTitle, Device: HostDevice, Text: title}, nil
+	})
+}
+
+// Next is the presenter's "done, next": the highlighted question (if any) is
+// marked answered and the top-ranked open question is highlighted instead.
+// It returns the new highlighted id, "" when the queue is empty. If the
+// second commit fails the answer stays, since it is already logged.
+func (b *Board) Next() (string, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	now := b.now()
+	done := b.highlighted
+	if done != "" {
+		if err := b.record(&Event{Type: EvAnswer, QID: done, Device: HostDevice, On: true}, now); err != nil {
+			return "", err
+		}
+		b.notify()
+	}
+	next := ""
+	for _, q := range Ranked(b.view("", true).Questions) {
+		if !q.Answered && !q.Hidden && q.ID != done {
+			next = q.ID
+			break
+		}
+	}
+	if err := b.record(&Event{Type: EvHighlight, QID: next, Device: HostDevice}, now); err != nil {
+		return "", err
+	}
+	b.notify()
+	return next, nil
 }
 
 // Subscribe returns a channel that receives a signal after each change.

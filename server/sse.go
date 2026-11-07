@@ -21,8 +21,14 @@ func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 	// subscribe before the first snapshot so no change slips in between
 	updates, cancel := s.Board.Subscribe()
 	defer cancel()
-	moved, cancelJoin := s.subscribeJoin()
-	defer cancelJoin()
+	if !host {
+		// counted before this stream subscribes, so it doesn't poke itself
+		closeStream := s.presence.open(DeviceID(r))
+		s.pokeAll()
+		defer func() { closeStream(); s.pokeAll() }()
+	}
+	poked, cancelPokes := s.subscribePokes()
+	defer cancelPokes()
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -53,7 +59,7 @@ func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 			if send() != nil {
 				return
 			}
-		case <-moved:
+		case <-poked:
 			if send() != nil {
 				return
 			}
@@ -78,6 +84,10 @@ func (s *Server) viewer(w http.ResponseWriter, r *http.Request) (host, ok bool) 
 func (s *Server) snapshot(r *http.Request, host bool) qna.View {
 	v := s.Board.View(DeviceID(r), host)
 	v.JoinURL, _ = s.join()
+	v.Public = s.Public
+	if host {
+		v.Connected = s.presence.count(s.Now())
+	}
 	return v
 }
 
@@ -87,6 +97,9 @@ func (s *Server) view(w http.ResponseWriter, r *http.Request) {
 	host, ok := s.viewer(w, r)
 	if !ok {
 		return
+	}
+	if !host && s.presence.polled(DeviceID(r), s.Now()) {
+		s.pokeAll() // a new phone: host streams show the new count
 	}
 	w.Header().Set("Cache-Control", "no-store")
 	writeJSON(w, http.StatusOK, s.snapshot(r, host))

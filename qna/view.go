@@ -23,14 +23,21 @@ type QuestionView struct {
 type View struct {
 	Questions   []QuestionView `json:"questions"` // creation order; never nil
 	Highlighted string         `json:"highlighted,omitempty"`
-	JoinURL     string         `json:"joinUrl,omitempty"` // filled by server
+	Title       string         `json:"title,omitempty"`
+	JoinURL     string         `json:"joinUrl,omitempty"`   // filled by server
+	Connected   int            `json:"connected,omitempty"` // host view only, filled by server
+	Public      bool           `json:"public,omitempty"`    // filled by server
 }
 
 // View returns a snapshot for one device. host=true includes hidden questions.
 func (b *Board) View(device string, host bool) View {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	v := View{Questions: make([]QuestionView, 0, len(b.order)), Highlighted: b.highlighted}
+	return b.view(device, host)
+}
+
+func (b *Board) view(device string, host bool) View {
+	v := View{Questions: make([]QuestionView, 0, len(b.order)), Highlighted: b.highlighted, Title: b.title}
 	for _, id := range b.order {
 		q := b.questions[id]
 		if q.Hidden && !host {
