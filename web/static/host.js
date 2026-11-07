@@ -97,7 +97,9 @@
     ].filter(Boolean) : []));
     const top = open.filter((q) => q !== now).sort(byTop).slice(0, TOP_ON_PROJECTOR);
     $("pjTop").replaceChildren(...top.map((q) =>
-      h("li", { class: "q" }, votes(q), h("div", { class: "q-body" }, h("p", { class: "text", text: q.text })))));
+      h("li", { class: "q" }, votes(q), h("div", { class: "q-body" },
+        h("p", { class: "text", text: q.text }),
+        h("p", { class: "who", text: q.name || t("anonymous") })))));
     $("pjUrl").textContent = view.joinUrl || location.origin;
     // a new join url means a new qr image; the query busts the browser cache
     const qrSrc = "/qr.png?u=" + encodeURIComponent(view.joinUrl || "");
