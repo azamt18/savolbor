@@ -14,7 +14,7 @@ type Props = {
 export function NowPanel({ current, top, now, onNext, onHide, onClear }: Props) {
   const { t } = useT();
   return (
-    <section className="now-card host-now" aria-label={t("nowAnswering")}>
+    <section className="now-card" aria-label={t("nowAnswering")}>
       <h2 className="now-label">{t("nowAnswering")}</h2>
       {current ? (
         <>

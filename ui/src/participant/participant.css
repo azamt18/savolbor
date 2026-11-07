@@ -94,30 +94,18 @@
   font-size: var(--fs-m);
   line-height: 1.4;
 }
-.name-chip {
-  flex: none;
-  max-width: 30%;
-  min-height: var(--tap);
-  padding: 0 8px;
-  border: 0;
-  background: none;
-  color: var(--lojuvard);
-  font-size: var(--fs-s);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .name-input {
-  flex: 0 1 40%;
-  min-width: 0;
-  min-height: 36px;
-  margin: 4px 0;
-  padding: 0 8px;
-  border: 1px solid var(--lojuvard);
-  border-radius: 6px;
-  background: var(--surface);
-  font-size: var(--fs-s);
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  margin-bottom: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: var(--fs-m);
 }
+.name-input:focus { border-color: var(--lojuvard); outline: none; }
 .send {
   display: inline-grid; place-items: center; flex: none;
   width: var(--tap); height: var(--tap);

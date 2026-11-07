@@ -124,3 +124,19 @@ test("export link explains the file format", () => {
   const link = screen.getByRole("link", { name: "Download questions" });
   expect(link.getAttribute("title")).toMatch(/\.md/);
 });
+
+test("clear highlight says it goes back to the queue", () => {
+  const cur = q({ text: "now" });
+  mockBoard(view([cur], { highlighted: cur.id }));
+  render(<HostApp />);
+  expect(screen.getByRole("button", { name: "Back to queue" })).toBeTruthy();
+  expect(screen.queryByText(/clear highlight/i)).toBeNull();
+});
+
+test("join qr shows under the now panel", () => {
+  mockBoard(view([]));
+  render(<HostApp />);
+  const img = screen.getByRole("img", { name: /QR 192\.168\.1\.23:8080/ });
+  expect(img.getAttribute("src")).toBe("/qr.png?u=" + encodeURIComponent("http://192.168.1.23:8080"));
+  expect(screen.getByText("192.168.1.23:8080")).toBeTruthy();
+});

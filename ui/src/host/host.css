@@ -27,10 +27,21 @@
   align-items: start;
 }
 .queue { grid-area: queue; min-width: 0; }
-.host-now { grid-area: now; position: sticky; top: 24px; }
+.host-side { grid-area: now; position: sticky; top: 24px; display: grid; gap: 16px; }
+.join-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.join-card img { width: 160px; height: 160px; flex: none; image-rendering: pixelated; }
+.join-url { margin: 0; font-size: var(--fs-l); font-weight: 600; overflow-wrap: anywhere; }
 @media (max-width: 900px) {
   .hgrid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "now" "queue"; }
-  .host-now { position: static; }
+  .host-side { position: static; }
 }
 
 .count { font-variant-numeric: tabular-nums; }

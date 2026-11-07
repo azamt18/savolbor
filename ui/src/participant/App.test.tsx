@@ -78,15 +78,14 @@ test("question text is never parsed as html", () => {
 test("send clears textarea and keeps name", async () => {
   const send = vi.fn(async () => null);
   render(<Composer onSend={send} />);
-  fireEvent.click(screen.getByRole("button", { name: /add your name/i }));
-  fireEvent.change(screen.getByPlaceholderText(/your name/i), { target: { value: "Dilnoza" } });
-  fireEvent.keyDown(screen.getByPlaceholderText(/your name/i), { key: "Enter" });
+  const name = screen.getByPlaceholderText(/your name/i) as HTMLInputElement;
+  fireEvent.change(name, { target: { value: "Dilnoza" } });
   const box = screen.getByPlaceholderText(/type your question/i) as HTMLTextAreaElement;
   fireEvent.change(box, { target: { value: "Agent xotirasi qanday ishlaydi?" } });
   await act_(() => fireEvent.click(screen.getByRole("button", { name: /^send$/i })));
   expect(send).toHaveBeenCalledWith("Agent xotirasi qanday ishlaydi?", "Dilnoza");
   expect(box.value).toBe("");
-  expect(screen.getByRole("button", { name: /dilnoza/i })).toBeTruthy();
+  expect(name.value).toBe("Dilnoza");
   expect(screen.getByText("Sent")).toBeTruthy();
 });
 
@@ -101,24 +100,24 @@ test("composer stays one row when empty", () => {
   expect(box.rows).toBe(1);
 });
 
-test("composer textarea opts out of password managers", () => {
+test("composer fields opt out of password managers", () => {
   render(<Composer onSend={noop} />);
-  const box = screen.getByPlaceholderText(/type your question/i);
-  expect(box.getAttribute("autocomplete")).toBe("off");
-  for (const a of ["data-1p-ignore", "data-lpignore", "data-bwignore"]) expect(box.hasAttribute(a), a).toBe(true);
+  for (const el of [screen.getByPlaceholderText(/type your question/i), screen.getByPlaceholderText(/your name/i)]) {
+    expect(el.getAttribute("autocomplete")).toBe("off");
+    for (const a of ["data-1p-ignore", "data-lpignore", "data-bwignore"]) expect(el.hasAttribute(a), a).toBe(true);
+  }
 });
 
-test("name chip opens an inline input; a saved name shows on the chip", () => {
+test("name field is always visible and remembers the saved name", () => {
   localStorage.setItem("savolbor_name", "Jasur");
   const { unmount } = render(<Composer onSend={noop} />);
-  const chip = screen.getByRole("button", { name: /jasur/i });
-  expect(screen.queryByPlaceholderText(/your name/i)).toBeNull();
-  fireEvent.click(chip);
   expect((screen.getByPlaceholderText(/your name/i) as HTMLInputElement).value).toBe("Jasur");
   unmount();
   localStorage.removeItem("savolbor_name");
   render(<Composer onSend={noop} />);
-  expect(screen.getByRole("button", { name: /add your name/i })).toBeTruthy();
+  const empty = screen.getByPlaceholderText(/your name/i) as HTMLInputElement;
+  expect(empty.value).toBe("");
+  expect(screen.getByLabelText(/your name/i)).toBe(empty);
 });
 
 test("counter appears only near the limit and counts runes", () => {

@@ -21,7 +21,6 @@ export function Composer({ onSend }: Props) {
   const { t } = useT();
   const [text, setText] = useState("");
   const [name, setName] = useState(() => storage.get("savolbor_name") ?? "");
-  const [naming, setNaming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -57,6 +56,18 @@ export function Composer({ onSend }: Props) {
   return (
     <form className="composer" onSubmit={submit}>
       {status && <p className={"composer-status" + (left < 0 ? " over" : "")} role="status">{status}</p>}
+      <input
+        className="name-input"
+        value={name}
+        maxLength={MAX_NAME * 2}
+        placeholder={t("namePlaceholder")}
+        aria-label={t("namePlaceholder")}
+        autoComplete="off"
+        data-1p-ignore=""
+        data-lpignore="true"
+        data-bwignore=""
+        onChange={(e) => saveName(e.target.value)}
+      />
       <div className="composer-box">
         <textarea
           value={text}
@@ -72,34 +83,6 @@ export function Composer({ onSend }: Props) {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
           }}
         />
-        {naming ? (
-          <input
-            className="name-input"
-            value={name}
-            autoFocus
-            maxLength={MAX_NAME * 2}
-            placeholder={t("namePlaceholder")}
-            aria-label={t("namePlaceholder")}
-            autoComplete="off"
-            data-1p-ignore=""
-            data-lpignore="true"
-            data-bwignore=""
-            onChange={(e) => saveName(e.target.value)}
-            onBlur={() => setNaming(false)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); setNaming(false); }
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            className="name-chip"
-            aria-label={name.trim() ? `${t("namePlaceholder")}: ${name.trim()}` : t("addName")}
-            onClick={() => setNaming(true)}
-          >
-            {name.trim() || t("nameChip")}
-          </button>
-        )}
         <button type="submit" className="send" aria-label={t("send")} disabled={!canSend}>
           <SendIcon />
         </button>

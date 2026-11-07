@@ -10,6 +10,7 @@ import { Queue, type HostTab } from "./Queue";
 import { NowPanel } from "./NowPanel";
 import { useShortcuts } from "./useShortcuts";
 import { Projector } from "./Projector";
+import { JoinCard } from "./JoinCard";
 
 function lists(questions: QuestionView[]): Record<HostTab, QuestionView[]> {
   return {
@@ -86,14 +87,17 @@ export function HostApp() {
       {error && <p className="error host-error" role="alert">{t(errorKey(error.code))}</p>}
 
       <main className="hgrid">
-        <NowPanel
-          current={current}
-          top={top}
-          now={now}
-          onNext={next}
-          onHide={(id) => hide(id, true)}
-          onClear={() => run(() => api.highlight(""))}
-        />
+        <aside className="host-side">
+          <NowPanel
+            current={current}
+            top={top}
+            now={now}
+            onNext={next}
+            onHide={(id) => hide(id, true)}
+            onClear={() => run(() => api.highlight(""))}
+          />
+          <JoinCard url={view?.joinUrl ?? location.origin} />
+        </aside>
         <Queue
           tab={tab}
           setTab={setTab}
