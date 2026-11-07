@@ -165,6 +165,35 @@
     return Date.parse(b.createdAt) - Date.parse(a.createdAt);
   }
 
+  // live keeps a page in sync. It prefers the sse stream; if no snapshot
+  // arrives within 4s (a proxy is buffering it), it switches to polling.
+  function live(query, onView, setOffline) {
+    let polling = null;
+    let streamed = false;
+    const es = new EventSource("/api/events" + query);
+    es.onmessage = (e) => {
+      streamed = true;
+      setOffline(false);
+      onView(JSON.parse(e.data));
+    };
+    es.onerror = () => { if (!polling) setOffline(true); };
+
+    async function poll() {
+      const res = await api("GET", "/api/view" + query);
+      setOffline(!res.ok);
+      if (res.ok) onView(res.data);
+    }
+    setTimeout(() => {
+      if (streamed) return;
+      es.close();
+      poll();
+      polling = setInterval(poll, 2000);
+    }, 4000);
+
+    // refresh is called after the page's own actions so polling feels instant
+    return { refresh() { if (polling) poll(); } };
+  }
+
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-lang]");
     if (btn) setLang(btn.dataset.lang);
@@ -172,7 +201,7 @@
   document.addEventListener("DOMContentLoaded", () => applyI18n());
 
   window.savolbor = {
-    t, setLang, applyI18n, api, errorText, h, runes, byTop, byNewest, store,
+    t, setLang, applyI18n, api, errorText, h, runes, byTop, byNewest, store, live,
     get lang() { return lang; },
     onLang(fn) { listeners.push(fn); },
   };

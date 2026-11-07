@@ -1,6 +1,6 @@
 // Participant page: ask, upvote, edit and delete own questions, live list.
 (function () {
-  const { t, api, errorText, h, runes, byTop, byNewest, store } = window.savolbor;
+  const { t, api, errorText, h, runes, byTop, byNewest, store, live } = window.savolbor;
   const MAX = 280;
   const $ = (id) => document.getElementById(id);
 
@@ -34,6 +34,7 @@
     send.disabled = true;
     const res = await api("POST", "/api/questions", { text: text.value, name: name.value });
     if (res.ok) {
+      sync.refresh();
       text.value = "";
       askError.textContent = "";
     } else {
@@ -54,6 +55,7 @@
   async function act(id, method, path, body) {
     const res = await api(method, path, body);
     rowError = res.ok ? null : { id, text: errorText(res.data && res.data.error) };
+    if (res.ok) sync.refresh();
     if (!res.ok) render();
     return res.ok;
   }
@@ -154,17 +156,14 @@
   }
 
   // ---- live updates ----
+  let sync = { refresh() {} };
   function connect() {
-    const es = new EventSource("/api/events");
-    es.onopen = () => { $("offline").hidden = true; };
-    es.onmessage = (e) => {
-      $("offline").hidden = true;
-      view = JSON.parse(e.data);
+    sync = live("", (v) => {
+      view = v;
       if (editing && !view.questions.some((q) => q.id === editing.id)) editing = null;
       if (confirming && !view.questions.some((q) => q.id === confirming)) confirming = null;
       render();
-    };
-    es.onerror = () => { $("offline").hidden = false; };
+    }, (off) => { $("offline").hidden = !off; });
   }
 
   window.savolbor.onLang(() => { updateCounter(); render(true); });

@@ -1,6 +1,6 @@
 // Presenter page: moderate questions, export, projector mode.
 (function () {
-  const { t, api, errorText, h, byTop, byNewest, store } = window.savolbor;
+  const { t, api, errorText, h, byTop, byNewest, store, live } = window.savolbor;
   const $ = (id) => document.getElementById(id);
   const TOP_ON_PROJECTOR = 5;
 
@@ -17,6 +17,7 @@
   async function act(method, path, body) {
     const res = await api(method, path, body);
     $("hostError").textContent = res.ok ? "" : errorText(res.data && res.data.error);
+    if (res.ok) sync.refresh();
   }
 
   // ---- projector mode ----
@@ -105,15 +106,9 @@
     document.querySelector(".projector-view").classList.toggle("pj-empty", !now && top.length === 0);
   }
 
+  let sync = { refresh() {} };
   function connect() {
-    const es = new EventSource("/api/events?view=host");
-    es.onopen = () => { $("offline").hidden = true; };
-    es.onmessage = (e) => {
-      $("offline").hidden = true;
-      view = JSON.parse(e.data);
-      render();
-    };
-    es.onerror = () => { $("offline").hidden = false; };
+    sync = live("?view=host", (v) => { view = v; render(); }, (off) => { $("offline").hidden = !off; });
   }
 
   window.savolbor.onLang(render);

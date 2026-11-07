@@ -48,6 +48,7 @@ cloudflared tunnel --url http://localhost:8080      # prints https://<random>.tr
 
 - in public mode the laptop is **not** trusted automatically: open the `presenter` link with `?key=` printed at startup.
 - requests that arrive through any proxy (`x-forwarded-for`, `cf-connecting-ip`, …) never count as the presenter, even without `-public-url`.
+- some networks (corporate tls inspection) hold the live stream back; pages notice within 4s and switch to polling `/api/view` every 2s.
 - anyone with the url can post. stop the tunnel (ctrl+c) when the session ends. check your company's policy before tunnelling from a work laptop.
 
 ## data and export
