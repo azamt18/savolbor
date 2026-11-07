@@ -250,3 +250,30 @@ func TestStaticAndQR(t *testing.T) {
 		t.Fatalf("qr: %d %q", w.Code, w.Header().Get("Content-Type"))
 	}
 }
+
+func TestCrossSiteWritesRejected(t *testing.T) {
+	e := newEnv(t)
+	id := postID(t, e.do(t, "POST", "/api/questions", `{"text":"q"}`))
+	// a malicious page open in the presenter's browser posts to localhost
+	req := httptest.NewRequest("POST", "/api/host/questions/"+id+"/hidden", strings.NewReader(`{"on":true}`))
+	req.RemoteAddr = "127.0.0.1:5555"
+	req.Header.Set("Sec-Fetch-Site", "cross-site")
+	req.Header.Set("Origin", "https://evil.example")
+	w := httptest.NewRecorder()
+	e.h.ServeHTTP(w, req)
+	if w.Code != 403 || errCode(t, w) != "forbidden" {
+		t.Fatalf("cross-site write: %d %s", w.Code, w.Body)
+	}
+	if e.board.View("", true).Questions[0].Hidden {
+		t.Fatal("question hidden by a cross-site request")
+	}
+	// same-origin browser requests still work
+	req = httptest.NewRequest("POST", "/api/host/questions/"+id+"/hidden", strings.NewReader(`{"on":true}`))
+	req.RemoteAddr = "127.0.0.1:5555"
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	w = httptest.NewRecorder()
+	e.h.ServeHTTP(w, req)
+	if w.Code != 204 {
+		t.Fatalf("same-origin write: %d %s", w.Code, w.Body)
+	}
+}

@@ -57,7 +57,13 @@ func New(cfg Config) http.Handler {
 	mux.HandleFunc("POST /api/host/questions/{id}/hidden", s.host(s.toggle(cfg.Board.SetHidden)))
 	mux.HandleFunc("POST /api/host/highlight", s.host(s.highlight))
 	mux.HandleFunc("GET /api/host/export.md", s.host(s.export))
-	return withDevice(mux)
+	// loopback counts as host, so a page open in the presenter's browser must
+	// not be able to post to localhost on their behalf
+	cop := http.NewCrossOriginProtection()
+	cop.SetDenyHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeErr(w, http.StatusForbidden, "forbidden")
+	}))
+	return cop.Handler(withDevice(mux))
 }
 
 func (s *server) page(name string) http.HandlerFunc {
