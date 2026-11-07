@@ -1,7 +1,7 @@
-// Package web holds the embedded participant and presenter pages.
+// Package web holds the built participant and presenter pages (ui/ → dist).
 package web
 
 import "embed"
 
-//go:embed static
-var Static embed.FS
+//go:embed all:dist
+var Dist embed.FS

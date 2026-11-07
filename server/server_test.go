@@ -27,9 +27,9 @@ func newEnv(t *testing.T) *env {
 	e := &env{clock: time.Date(2026, 11, 6, 10, 0, 0, 0, time.UTC)}
 	e.board = qna.NewBoard(func(qna.Event) error { return nil }, func() time.Time { return e.clock })
 	static := fstest.MapFS{
-		"index.html": {Data: []byte("participant")},
-		"host.html":  {Data: []byte("presenter")},
-		"app.js":     {Data: []byte("js")},
+		"index.html":    {Data: []byte("participant")},
+		"host.html":     {Data: []byte("presenter")},
+		"assets/app.js": {Data: []byte("js")},
 	}
 	e.h = New(Config{Board: e.board, AdminKey: adminKey, JoinURL: "http://192.168.1.23:8080", Static: fs.FS(static), Now: func() time.Time { return e.clock }})
 	return e
@@ -239,7 +239,7 @@ func TestExportDownload(t *testing.T) {
 
 func TestStaticAndQR(t *testing.T) {
 	e := newEnv(t)
-	if w := e.do(t, "GET", "/static/app.js", ""); w.Code != 200 || w.Body.String() != "js" {
+	if w := e.do(t, "GET", "/assets/app.js", ""); w.Code != 200 || w.Body.String() != "js" {
 		t.Fatalf("static: %d %q", w.Code, w.Body)
 	}
 	w := e.do(t, "GET", "/qr.png", "")

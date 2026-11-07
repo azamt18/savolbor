@@ -22,7 +22,7 @@ type Config struct {
 	Board    *qna.Board
 	AdminKey string
 	JoinURL  string           // initial value; see SetJoinURL
-	Static   fs.FS            // web.Static sub-tree "static"
+	Static   fs.FS            // built pages: index.html, host.html, assets/
 	Now      func() time.Time // export date; defaults to time.Now
 	Public   bool             // reachable from the internet: loopback no longer implies host
 }
@@ -50,7 +50,7 @@ func New(cfg Config) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.page("index.html"))
 	mux.HandleFunc("GET /host", s.hostPage)
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(cfg.Static)))
+	mux.HandleFunc("GET /assets/", s.assets(http.FileServerFS(cfg.Static)))
 	mux.HandleFunc("GET /qr.png", s.qrPNG)
 
 	mux.HandleFunc("POST /api/questions", s.post)
@@ -125,6 +125,14 @@ func (s *Server) page(name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache")
 		http.ServeFileFS(w, r, s.Static, name)
+	}
+}
+
+// assets are content-hashed by vite, so they never change under one name.
+func (s *Server) assets(files http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		files.ServeHTTP(w, r)
 	}
 }
 

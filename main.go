@@ -77,7 +77,7 @@ func run() error {
 		joinURL = strings.TrimRight(*publicURL, "/")
 	}
 
-	static, err := fs.Sub(web.Static, "static")
+	static, err := fs.Sub(web.Dist, "dist")
 	if err != nil {
 		return err
 	}

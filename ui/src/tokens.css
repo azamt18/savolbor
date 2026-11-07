@@ -1,0 +1,55 @@
+/* onest (ofl, see fonts/OFL.txt), embedded: the room has no internet */
+@font-face {
+  font-family: "Onest"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("./fonts/onest-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Onest"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("./fonts/onest-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Onest"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("./fonts/onest-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Onest"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("./fonts/onest-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  --paper: #F7F8FA;
+  --surface: #FFFFFF;
+  --ink: #16203A;
+  --muted: #6B7489;
+  --line: #E3E6ED;
+  --lojuvard: #2448A8;
+  --firuza: #0E9F8E;
+  --zar: #E2A43B;
+
+  --font: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-s: 15px;
+  --fs-m: 17px;
+  --fs-l: 22px;
+  --fs-xl: 34px;
+  --lh: 1.45;
+  --lh-display: 1.15;
+  --tap: 44px;
+  --radius: 12px;
+}
+
+/* dark is for phones only; /host and the projector set data-theme="light" */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1424;
+    --surface: #182036;
+    --ink: #E8ECF5;
+    --muted: #9AA3B8;
+    --line: #26304A;
+    --lojuvard: #7D9BFF;
+    --firuza: #3CCFBC;
+  }
+}
