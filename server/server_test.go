@@ -137,14 +137,11 @@ func TestHTMLTextReturnedRaw(t *testing.T) {
 	}
 }
 
-func TestRateLimitReturns429(t *testing.T) {
+func TestBackToBackPostsAndEmpty(t *testing.T) {
 	e := newEnv(t)
 	c := &http.Cookie{Name: "savolbor_device", Value: strings.Repeat("c", 32)}
 	postID(t, e.do(t, "POST", "/api/questions", `{"text":"one"}`, c))
-	w := e.do(t, "POST", "/api/questions", `{"text":"two"}`, c)
-	if w.Code != 429 || errCode(t, w) != "rate_limited" {
-		t.Fatalf("second post: %d %s", w.Code, w.Body)
-	}
+	postID(t, e.do(t, "POST", "/api/questions", `{"text":"two"}`, c))
 	if w := e.do(t, "POST", "/api/questions", `{"text":"   "}`); w.Code != 400 || errCode(t, w) != "empty" {
 		t.Fatalf("empty: %d %s", w.Code, w.Body)
 	}

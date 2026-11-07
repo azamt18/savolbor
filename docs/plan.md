@@ -10,12 +10,14 @@
 
 **Spec:** [products/savolbor/docs/spec.md](spec.md)
 
+**Status (2026-11-07):** tasks 1–7 done on branch `feat/savolbor` (not merged). behaviour added after the plan is recorded in [post-plan changes](#post-plan-changes-as-built); the readme is the operator guide.
+
 ## Global Constraints
 
 - module root: `products/savolbor/`, module path `savolbor`, `go 1.26`.
 - the only third-party module is `github.com/skip2/go-qrcode`. no js libraries, no cdn links, no fonts from the internet — the room has no internet.
 - question text: trimmed, non-empty, max **280 runes** (count with `utf8.RuneCountInString`, never `len`). display name: trimmed, max **40 runes**, optional.
-- post rate limit: **1 new question per device per 20 seconds**. edits/deletes/votes are not rate limited.
+- ~~post rate limit: 1 new question per device per 20 seconds~~ — removed 2026-11-07; nothing is rate limited.
 - edit allowed only by the author and only while not answered; sets `Edited=true`; votes kept.
 - one vote per device per question; repeat votes are a silent no-op.
 - hidden questions are invisible to participants (not listed, not votable, not editable) and excluded from export.
@@ -113,9 +115,9 @@ products/savolbor/
 - every command: lock → validate → build event (id = 8 random bytes hex for posts) → `commit(e)` (on error return it, state untouched) → `apply` → non-blocking send on each subscriber channel (buffer 1, so bursts coalesce) → unlock.
 - `Delete` of the highlighted question clears the highlight. participant commands on a hidden question return `ErrNotFound`.
 
-- [ ] **Step 1: init module** — `cd products/savolbor && go mod init savolbor` and set `go 1.26`.
+- [x] **Step 1: init module** — `cd products/savolbor && go mod init savolbor` and set `go 1.26`.
 
-- [ ] **Step 2: write the failing tests** in `qna/board_test.go` using a fake clock (`now := func() time.Time { return t0 }`, advance a variable) and a commit spy that records events:
+- [x] **Step 2: write the failing tests** in `qna/board_test.go` using a fake clock (`now := func() time.Time { return t0 }`, advance a variable) and a commit spy that records events:
   - `TestPostAcceptsUzbek280Runes` — 280 runes of `"oʻ"`-mix text → ok; 281 → `ErrTooLong`; `"   "` → `ErrEmpty`; name of 41 runes → `ErrTooLong`.
   - `TestPostRateLimit` — second post from same device at +19s → `ErrRateLimited`; at +20s → ok; other device at +1s → ok.
   - `TestEditOwnerOnlyUntilAnswered` — other device → `ErrNotOwner`; author → ok and `Edited` true, votes unchanged; after `SetAnswered(id,true)` → `ErrAnswered`.
@@ -125,14 +127,14 @@ products/savolbor/
   - `TestReplayRebuildsState` — feed the spy's recorded events into a fresh board via `Apply` → same questions, voters, flags, highlight.
   - `TestSubscribeCoalesces` — three commands, then one receive succeeds and a second non-blocking receive finds nothing.
 
-- [ ] **Step 3: run** `go test ./qna/` → FAIL (undefined: NewBoard).
+- [x] **Step 3: run** `go test ./qna/` → FAIL (undefined: NewBoard).
 
-- [ ] **Step 4: implement** `event.go`, `errors.go`, `board.go` per the interfaces above.
+- [x] **Step 4: implement** `event.go`, `errors.go`, `board.go` per the interfaces above.
   > **learning by doing (for the human):** leave `Post`'s validation block (trim, rune limits, cooldown check) as `TODO(human)` and hand it over — it's where the uzbek rune-count and rate-limit rules live.
 
-- [ ] **Step 5: run** `go test -race ./qna/` → PASS.
+- [x] **Step 5: run** `go test -race ./qna/` → PASS.
 
-- [ ] **Step 6: commit** — `feat(savolbor): add event-sourced q&a board`.
+- [x] **Step 6: commit** — `feat(savolbor): add event-sourced q&a board`.
 
 ---
 
@@ -152,14 +154,14 @@ products/savolbor/
   ```
 - reading: `bufio.Scanner` with a 1 MiB buffer; a line that fails to unmarshal is skipped with `slog.Warn` (line number), never fatal. open the file `O_APPEND|O_CREATE|O_RDWR`, perms `0o644`. if the file doesn't end in `\n` (torn write), write one `\n` before the first append so the next event starts on a fresh line.
 
-- [ ] **Step 1: write the failing tests:**
+- [x] **Step 1: write the failing tests:**
   - `TestAppendThenReopen` — append 3 events, close, `Open` again → same 3 events (compare `Type`, `QID`, `Text`, `At.Equal`).
   - `TestTruncatedLastLineIsSkipped` — file containing 2 valid lines + `{"type":"po` → `Open` returns 2 events, nil error; a following `Append` + reopen → 3 events.
   - `TestOpenCreatesMissingFile`.
-- [ ] **Step 2: run** `go test ./store/` → FAIL.
-- [ ] **Step 3: implement** `store/log.go`.
-- [ ] **Step 4: run** `go test -race ./store/` → PASS.
-- [ ] **Step 5: commit** — `feat(savolbor): persist events to json-lines log`.
+- [x] **Step 2: run** `go test ./store/` → FAIL.
+- [x] **Step 3: implement** `store/log.go`.
+- [x] **Step 4: run** `go test -race ./store/` → PASS.
+- [x] **Step 5: commit** — `feat(savolbor): persist events to json-lines log`.
 
 ---
 
@@ -235,23 +237,23 @@ products/savolbor/
 - error mapping → json `{"error":"<code>"}` (the client translates the code via i18n): `ErrEmpty` 400 `empty`, `ErrTooLong` 400 `too_long`, `ErrRateLimited` 429 `rate_limited`, `ErrNotFound` 404 `not_found`, `ErrNotOwner` 403 `not_owner`, `ErrAnswered` 409 `answered`, bad json 400 `bad_request`, non-host on host route 403 `forbidden`, anything else 500 `internal`. request bodies capped with `http.MaxBytesReader` at 8 KiB.
 - `IsHost`: `net.SplitHostPort(r.RemoteAddr)` → `ip.IsLoopback()`, else key from query or cookie.
 
-- [ ] **Step 1: write failing tests** in `qna/view_test.go`:
+- [x] **Step 1: write failing tests** in `qna/view_test.go`:
   - `TestViewHidesHiddenForParticipants` and shows them (with `Hidden`) for host.
   - `TestViewMineAndVoted` — flags are per device.
   - `TestRankedVotesThenOldest`.
   - `TestExportMarkdownExact` — compare against the exact format above.
-- [ ] **Step 2: write failing tests** in `server/server_test.go` with `httptest` and a cookie jar client (`httptest.NewServer` binds loopback, so for "remote participant" tests call the handler directly with `httptest.NewRequest` and set `req.RemoteAddr = "192.168.1.50:1234"`):
+- [x] **Step 2: write failing tests** in `server/server_test.go` with `httptest` and a cookie jar client (`httptest.NewServer` binds loopback, so for "remote participant" tests call the handler directly with `httptest.NewRequest` and set `req.RemoteAddr = "192.168.1.50:1234"`):
   - `TestFirstRequestSetsDeviceCookie` — `HttpOnly`, `SameSite=Lax`.
   - `TestPostAndEditFlow` — post → 201; edit with same cookie → 204; edit with a different cookie → 403 `not_owner`.
   - `TestHTMLTextReturnedRaw` — post `<img src=x onerror=alert(1)>` → `GET` via `Board.View` text equals the input byte-for-byte (escaping is the client's job).
   - `TestRateLimitReturns429`.
   - `TestHostRoutesForbiddenForRemoteWithoutKey`, `TestHostKeyQuerySetsCookieAndRedirects`, `TestHostAllowedFromLoopback`.
   - `TestExportDownload` — content type and filename.
-- [ ] **Step 3: run** `go test ./...` → FAIL.
-- [ ] **Step 4: implement** `view.go`, `export.go`, `web/embed.go`, `server/device.go`, `server/server.go`. add the qr module: `go get github.com/skip2/go-qrcode`.
+- [x] **Step 3: run** `go test ./...` → FAIL.
+- [x] **Step 4: implement** `view.go`, `export.go`, `web/embed.go`, `server/device.go`, `server/server.go`. add the qr module: `go get github.com/skip2/go-qrcode`.
   > **learning by doing (for the human):** hand over `Ranked`'s comparator as `TODO(human)` — the tie-break rule decides which question the projector shows first.
-- [ ] **Step 5: run** `go test -race ./... && go vet ./...` → PASS.
-- [ ] **Step 6: commit** — `feat(savolbor): add json api, views and markdown export`.
+- [x] **Step 5: run** `go test -race ./... && go vet ./...` → PASS.
+- [x] **Step 6: commit** — `feat(savolbor): add json api, views and markdown export`.
 
 ---
 
@@ -268,15 +270,15 @@ products/savolbor/
 - loop: subscribe **before** writing the first snapshot (no lost update window) → write `data: <View json>\n\n` + flush → `select` on update channel (write snapshot), a 25s ticker (write `: ping\n\n`), and `r.Context().Done()` (cancel subscription, return). `View.JoinURL` is set from config on every snapshot.
 - set `retry: 2000\n` once at stream start so phones reconnect quickly.
 
-- [ ] **Step 1: write failing tests:**
+- [x] **Step 1: write failing tests:**
   - `TestSSESendsSnapshotOnConnect` — connect, read first `data:` line, unmarshal → `View` with existing questions.
   - `TestSSEPushesAfterPost` — connect, post via api, next `data:` contains the new question.
   - `TestSSEHostViewRequiresHost`.
   - `TestSSEUnsubscribesOnDisconnect` — cancel request context, then posting does not block (run with `-race`, a 1s timeout).
-- [ ] **Step 2: run** `go test ./server/` → FAIL.
-- [ ] **Step 3: implement** `server/sse.go` (use `http.NewResponseController(w).Flush()`).
-- [ ] **Step 4: run** `go test -race ./...` → PASS.
-- [ ] **Step 5: commit** — `feat(savolbor): push live board snapshots over sse`.
+- [x] **Step 2: run** `go test ./server/` → FAIL.
+- [x] **Step 3: implement** `server/sse.go` (use `http.NewResponseController(w).Flush()`).
+- [x] **Step 4: run** `go test -race ./...` → PASS.
+- [x] **Step 5: commit** — `feat(savolbor): push live board snapshots over sse`.
 
 ---
 
@@ -293,9 +295,9 @@ products/savolbor/
 - page: header with title + `uz | en` toggle; form (textarea `maxlength=280` with live counter, name input remembered in `localStorage` `savolbor_name`, send button); tabs `top` / `newest` (client-side sort; `top` uses votes desc then oldest); the highlighted question pinned at top with a `nowAnswering` badge; unanswered list then a collapsed `answered` section; own questions get edit/delete (edit hidden when answered; delete confirmation is an inline "are you sure" row, not `confirm()`); vote button disabled once `voted`; `offline` banner while `EventSource` is in error state.
 - render by rebuilding the list from each snapshot with `textContent` (≤300 items, no diffing needed). mobile-first css, ≥44px tap targets, works at 360px width, light/dark via `prefers-color-scheme`.
 
-- [ ] **Step 1: build the page** per the above.
-- [ ] **Step 2: manual check** — `go run .` (task 7 wires main; until then use a tiny `main.go` stub, or do task 7 before 5–6 if preferred), open `http://localhost:8080` in two browser profiles: post, vote, edit, delete, toggle language; post `<img src=x onerror=alert(1)>` → shows as text; second profile updates live without refresh; stop the server → `offline` banner; start again → banner clears and list returns.
-- [ ] **Step 3: commit** — `feat(savolbor): add participant page`.
+- [x] **Step 1: build the page** per the above.
+- [x] **Step 2: manual check** — `go run .` (task 7 wires main; until then use a tiny `main.go` stub, or do task 7 before 5–6 if preferred), open `http://localhost:8080` in two browser profiles: post, vote, edit, delete, toggle language; post `<img src=x onerror=alert(1)>` → shows as text; second profile updates live without refresh; stop the server → `offline` banner; start again → banner clears and list returns.
+- [x] **Step 3: commit** — `feat(savolbor): add participant page`.
 
 ---
 
@@ -310,9 +312,9 @@ products/savolbor/
 - normal mode: list with sort `top`/`newest`, per-question buttons answer / hide / highlight, hidden questions shown dimmed with an unhide button, export button (link to `/api/host/export.md`), counters (total, unanswered).
 - projector mode (toggle button, also `p` key and `Esc` to leave; stored in `localStorage` `savolbor_projector`): adds `body.projector` → hides every control; shows big qr (`/qr.png`) + `JoinURL` text, the highlighted question in large type, and the top 5 unanswered by votes. font sizes in `vw`/`clamp()` so it reads from the back of a room.
 
-- [ ] **Step 1: build the page.**
-- [ ] **Step 2: manual check** — on `http://localhost:8080/host`: answer/hide/highlight each reflect live on a participant tab; hidden question disappears from participant; export downloads markdown matching the spec format; projector mode shows qr + highlight, no buttons visible; html-payload question renders as text in both modes.
-- [ ] **Step 3: commit** — `feat(savolbor): add presenter page with projector mode`.
+- [x] **Step 1: build the page.**
+- [x] **Step 2: manual check** — on `http://localhost:8080/host`: answer/hide/highlight each reflect live on a participant tab; hidden question disappears from participant; export downloads markdown matching the spec format; projector mode shows qr + highlight, no buttons visible; html-payload question renders as text in both modes.
+- [x] **Step 3: commit** — `feat(savolbor): add presenter page with projector mode`.
 
 ---
 
@@ -347,12 +349,42 @@ products/savolbor/
 - `SIGINT`/`SIGTERM` → `srv.Shutdown` with a 2s timeout (sse streams end via request context) → `log.Close()`. port in use → clear error message, exit 1.
 - readme (lowercase): what it is, `go build -o savolbor .`, how to run in a room (hotspot tip: phone hotspots often cap ~10–30 devices, prefer venue wi-fi or a travel router for bigger groups), macos firewall prompt → allow incoming, flags, where data and exports go.
 
-- [ ] **Step 1: write failing tests** in `lanip_test.go`:
+- [x] **Step 1: write failing tests** in `lanip_test.go`:
   - `TestPickPrefersWiFiOverVPN` — `utun4: 10.8.0.3`, `en0: 192.168.1.23` → best `192.168.1.23`, all `[192.168.1.23, 10.8.0.3]`.
   - `TestPickSkipsLinkLocalAndIPv6` — `en0: 169.254.3.4, fe80::1` and `bridge100: 192.168.2.1` → best `192.168.2.1`.
   - `TestPickNone` — only loopback → `nil`.
-- [ ] **Step 2: run** `go test .` → FAIL.
-- [ ] **Step 3: implement** `lanip.go`, `main.go`, `README.md`.
-- [ ] **Step 4: run** `go test -race ./... && go vet ./... && go build -o savolbor .` → PASS, binary built.
-- [ ] **Step 5: end-to-end check** — run `./savolbor`; scan the terminal qr with a real phone on the same wi-fi; post + vote from the phone; laptop `/host` sees it live; ctrl+c, start again → questions restored; `kill -9` mid-session, start again → restored (review focus 2).
-- [ ] **Step 6: commit** — `feat(savolbor): add startup, lan discovery and readme`. add `savolbor` binary and `*.jsonl` to `products/savolbor/.gitignore` in the same commit.
+- [x] **Step 2: run** `go test .` → FAIL.
+- [x] **Step 3: implement** `lanip.go`, `main.go`, `README.md`.
+- [x] **Step 4: run** `go test -race ./... && go vet ./... && go build -o savolbor .` → PASS, binary built.
+- [x] **Step 5: end-to-end check** — run `./savolbor`; scan the terminal qr with a real phone on the same wi-fi; post + vote from the phone; laptop `/host` sees it live; ctrl+c, start again → questions restored; `kill -9` mid-session, start again → restored (review focus 2).
+- [x] **Step 6: commit** — `feat(savolbor): add startup, lan discovery and readme`. add `savolbor` binary and `*.jsonl` to `products/savolbor/.gitignore` in the same commit.
+
+---
+
+## post-plan changes (as built)
+
+added in the implementation session after tasks 1–7, each with its own commit and tests. recorded here so the plan matches the code; nothing left to execute.
+
+| commit | change | where | tests |
+|---|---|---|---|
+| `b21b24d` | **cross-site write protection** — loopback counts as host, so a page in the presenter's browser could post to `localhost`. all routes go through `http.NewCrossOriginProtection()`; denied → 403 `forbidden` | `server/server.go` | `server/server_test.go` |
+| `fb2ac12` | **qr centred on an empty projector** — no highlight and no questions → the qr fills the screen | `web/static/host.js`, `style.css` | manual |
+| `6c178c5` | **`-debug` request logging** — one log line per request; no line when a phone connects = the request never reached the laptop (firewall, vpn agent, ap isolation) | `debuglog.go`, `main.go` | `debuglog_test.go` |
+| `423a7e4` | **join url follows the laptop's address** — `watchJoinURL` re-checks every 5s; on change: `Server.SetJoinURL` regenerates the qr png, pushes a fresh snapshot to every stream, prints the new url + qr in the terminal; projector reloads the qr image. disabled in public mode | `joinurl.go`, `server/server.go`, `server/sse.go`, `host.js` | `joinurl_test.go`, `server/join_test.go` |
+| `0830076` | **public mode for tunnels** — requests carrying `X-Forwarded-For`, `Forwarded`, `Cf-Connecting-Ip` or `X-Real-Ip` are never host, even from loopback. `-public-url <url>` sets `Config.Public` (loopback no longer implies host) and fixes the join url/qr to the tunnel url | `server/device.go` (`fromLocalBrowser`), `server/server.go`, `main.go` | `server/public_test.go` |
+| `64ef0d7` | **sse → polling fallback** — through tunnels / corporate tls inspection the stream can arrive headers-only. new `GET /api/view` returns the same `View` as one sse snapshot; pages switch to polling it every 2s if no snapshot arrives within 4s, and refresh right after their own actions | `server/sse.go`, `server/server.go`, `i18n.js`, `app.js`, `host.js` | `server/view_test.go` |
+
+### deltas to the sections above
+
+- **global constraints → host access:** host = (loopback **and** no proxy header **and** not public mode) **or** valid key; plus cross-origin writes are rejected.
+- **task 3 routes:** add `GET /api/view` (participant or `?view=host`, same access rule as `/api/events`).
+- **task 7 flags:** add `-debug bool` (off) and `-public-url string` (empty).
+- **rate limit removed (2026-11-07):** `PostCooldown`, `ErrRateLimited`, `Board.lastPost`, the 429 `rate_limited` mapping and the `err_rate_limited` strings are gone; `TestPostRateLimit` / `TestRateLimitReturns429` replaced by `TestPostBackToBackAllowed` / `TestBackToBackPostsAndEmpty`. task 1–3 text above still describes the original design.
+- **delete rule:** authors may delete their own question at any time (only *edit* stops once answered) — this is what the code does and what the spec says.
+
+## open
+
+- real-phone qr scan in an actual room.
+- merge decision for `feat/savolbor`.
+- ui redesign — decided 2026-11-07: react + vite + ts, light-first, done-next, session title, connected count. next to execute: [plan-redesign.md](plan-redesign.md).
+

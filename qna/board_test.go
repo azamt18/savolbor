@@ -37,7 +37,7 @@ func (h *harness) post(t *testing.T, device, text string) string {
 	if err != nil {
 		t.Fatalf("post %q: %v", text, err)
 	}
-	h.advance(PostCooldown)
+	h.advance(time.Second)
 	return id
 }
 
@@ -51,7 +51,6 @@ func TestPostAcceptsUzbek280Runes(t *testing.T) {
 	if _, err := h.b.Post("d1", text, ""); err != nil {
 		t.Fatalf("280 runes: want ok, got %v", err)
 	}
-	h.advance(PostCooldown)
 	if _, err := h.b.Post("d1", text+"a", ""); !errors.Is(err, ErrTooLong) {
 		t.Fatalf("281 runes: want ErrTooLong, got %v", err)
 	}
@@ -66,22 +65,15 @@ func TestPostAcceptsUzbek280Runes(t *testing.T) {
 	}
 }
 
-func TestPostRateLimit(t *testing.T) {
+func TestPostBackToBackAllowed(t *testing.T) {
 	h := newHarness()
-	if _, err := h.b.Post("d1", "first", ""); err != nil {
-		t.Fatal(err)
+	for _, text := range []string{"first", "second", "third"} {
+		if _, err := h.b.Post("d1", text, ""); err != nil {
+			t.Fatalf("post %q at the same instant: %v", text, err)
+		}
 	}
-	h.advance(19 * time.Second)
-	if _, err := h.b.Post("d1", "second", ""); !errors.Is(err, ErrRateLimited) {
-		t.Fatalf("+19s: want ErrRateLimited, got %v", err)
-	}
-	h.clock = t0.Add(time.Second)
-	if _, err := h.b.Post("d2", "other device", ""); err != nil {
-		t.Fatalf("other device +1s: want ok, got %v", err)
-	}
-	h.clock = t0.Add(20 * time.Second)
-	if _, err := h.b.Post("d1", "second", ""); err != nil {
-		t.Fatalf("+20s: want ok, got %v", err)
+	if len(h.b.order) != 3 {
+		t.Fatalf("questions = %d, want 3", len(h.b.order))
 	}
 }
 
@@ -172,7 +164,7 @@ func TestCommitFailureLeavesStateUntouched(t *testing.T) {
 	}
 	h.fail = nil
 	if _, err := h.b.Post("d1", "question", ""); err != nil {
-		t.Fatalf("failed post must not start the cooldown: %v", err)
+		t.Fatalf("retry after commit failure: %v", err)
 	}
 }
 
@@ -215,14 +207,6 @@ func TestReplayRebuildsState(t *testing.T) {
 	}
 	if fresh.highlighted != b {
 		t.Fatalf("highlight = %q, want %q", fresh.highlighted, b)
-	}
-	// replay restores the cooldown: d3 posted at t0+40s
-	if !fresh.lastPost["d3"].Equal(t0.Add(40 * time.Second)) {
-		t.Fatalf("lastPost[d3] = %v", fresh.lastPost["d3"])
-	}
-	fresh.now = func() time.Time { return t0.Add(50 * time.Second) }
-	if _, err := fresh.Post("d3", "too soon", ""); !errors.Is(err, ErrRateLimited) {
-		t.Fatalf("want ErrRateLimited after replay, got %v", err)
 	}
 }
 

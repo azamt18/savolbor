@@ -228,8 +228,6 @@ func writeBoardErr(w http.ResponseWriter, err error) {
 		writeErr(w, http.StatusBadRequest, "empty")
 	case errors.Is(err, qna.ErrTooLong):
 		writeErr(w, http.StatusBadRequest, "too_long")
-	case errors.Is(err, qna.ErrRateLimited):
-		writeErr(w, http.StatusTooManyRequests, "rate_limited")
 	case errors.Is(err, qna.ErrNotFound):
 		writeErr(w, http.StatusNotFound, "not_found")
 	case errors.Is(err, qna.ErrNotOwner):

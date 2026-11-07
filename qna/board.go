@@ -11,9 +11,8 @@ import (
 )
 
 const (
-	MaxTextLen   = 280
-	MaxNameLen   = 40
-	PostCooldown = 20 * time.Second
+	MaxTextLen = 280
+	MaxNameLen = 40
 )
 
 type question struct {
@@ -36,7 +35,6 @@ type Board struct {
 	now         func() time.Time
 	questions   map[string]*question
 	order       []string
-	lastPost    map[string]time.Time
 	highlighted string
 	subs        map[int]chan struct{}
 	nextSub     int
@@ -47,12 +45,11 @@ func NewBoard(commit func(Event) error, now func() time.Time) *Board {
 		commit:    commit,
 		now:       now,
 		questions: map[string]*question{},
-		lastPost:  map[string]time.Time{},
 		subs:      map[int]chan struct{}{},
 	}
 }
 
-// Apply replays a logged event: no commit, no rate limit, no notify.
+// Apply replays a logged event: no commit, no notify.
 func (b *Board) Apply(e Event) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -67,7 +64,6 @@ func (b *Board) apply(e Event) error {
 			CreatedAt: e.At, Voters: map[string]struct{}{},
 		}
 		b.order = append(b.order, e.QID)
-		b.lastPost[e.Device] = e.At
 		return nil
 	case EvHighlight:
 		b.highlighted = e.QID
@@ -164,7 +160,7 @@ func cleanText(s string, max int, required bool) (string, error) {
 
 func (b *Board) Post(device, text, name string) (string, error) {
 	var id string
-	err := b.exec(func(now time.Time) (*Event, error) {
+	err := b.exec(func(time.Time) (*Event, error) {
 		text, err := cleanText(text, MaxTextLen, true)
 		if err != nil {
 			return nil, err
@@ -172,9 +168,6 @@ func (b *Board) Post(device, text, name string) (string, error) {
 		name, err := cleanText(name, MaxNameLen, false)
 		if err != nil {
 			return nil, err
-		}
-		if last, ok := b.lastPost[device]; ok && now.Sub(last) < PostCooldown {
-			return nil, ErrRateLimited
 		}
 		id = newID()
 		return &Event{Type: EvPost, QID: id, Device: device, Text: text, Name: name}, nil

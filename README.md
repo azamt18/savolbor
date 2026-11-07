@@ -24,7 +24,7 @@ tips:
 - **phone hotspots** usually cap at ~10–30 devices. for bigger groups use the venue wi-fi or a travel router.
 - **macos firewall**: on first run macos asks whether to accept incoming connections — choose *allow*, otherwise phones can't connect.
 - **vpn on**: the join url prefers wi-fi/ethernet/hotspot addresses over vpn tunnels. every other address is printed under *other addresses* if you need to pick one by hand.
-- **address changed?** the join url is worked out at startup. if the laptop switches networks (or gets a new address), restart savolbor so the qr code points to the new one.
+- **address changed?** savolbor re-checks the laptop's address every 5s. if it switches networks, the terminal prints the new url and qr, and the projector qr updates by itself (not in `-public-url` mode).
 - **work laptops**: corporate vpn / security agents (globalprotect, sentinelone, …) can silently drop incoming lan connections even when the macos firewall allows them. run `./savolbor -debug`, open the url from a phone: no log line means the laptop is blocking it — use a personal machine.
 - some venue networks isolate clients from each other ("ap isolation"). if phones can't open the url, use a hotspot instead.
 
@@ -58,9 +58,9 @@ cloudflared tunnel --url http://localhost:8080      # prints https://<random>.tr
 
 ## rules
 
-- questions: up to 280 characters, one new question per phone every 20 seconds.
+- questions: up to 280 characters, no limit on how often a phone can post.
 - one vote per phone per question.
-- authors can edit or delete their own question until it is marked answered.
+- authors can edit their own question until it is marked answered, and delete it at any time.
 - hidden questions disappear from participants' phones.
 
 ## develop
