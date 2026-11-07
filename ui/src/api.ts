@@ -19,6 +19,7 @@ export type View = {
   joinUrl?: string;
   connected?: number;
   public?: boolean;
+  wifi?: string;
 };
 
 // code is the server's error code ("not_found", …) or "network".

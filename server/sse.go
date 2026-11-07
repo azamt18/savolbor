@@ -85,6 +85,7 @@ func (s *Server) snapshot(r *http.Request, host bool) qna.View {
 	v := s.Board.View(DeviceID(r), host)
 	v.JoinURL, _ = s.join()
 	v.Public = s.Public
+	v.Wifi = s.Wifi
 	if host {
 		v.Connected = s.presence.count(s.Now())
 	}

@@ -66,6 +66,7 @@ export function Projector({ view, onExit, onNext, onHide }: { view: View } & Han
         <Qr url={url} className="pj-qr-big" />
         <p className="pj-scan">{t("scanToAsk")}</p>
         <p className="pj-url">{shortUrl(url)}</p>
+        {view.wifi && <p className="pj-wifi">{t("wifiName", { name: view.wifi })}</p>}
         {exit}
       </div>
     );
@@ -96,7 +97,10 @@ export function Projector({ view, onExit, onNext, onHide }: { view: View } & Han
         </div>
         <div className="pj-join">
           <Qr url={url} className="pj-qr" />
-          <p className="pj-url-small">{shortUrl(url)}</p>
+          <div>
+            <p className="pj-url-small">{shortUrl(url)}</p>
+            {view.wifi && <p className="pj-wifi-small">{t("wifiName", { name: view.wifi })}</p>}
+          </div>
         </div>
       </footer>
       {exit}

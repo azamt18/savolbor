@@ -63,6 +63,7 @@ const uz = {
   queueEmpty: "Navbatda savol yoʻq.",
   inviteHeadline: "Savolingiz bormi?",
   scanToAsk: "Skanerlang yoki shu manzilni oching",
+  wifiName: "Wi-Fi: {name}",
   shortcuts: "j/k — tanlash · enter — javob berish · n — tayyor, keyingisi · x — yashirish · p — proyektor",
 };
 
@@ -129,6 +130,7 @@ const en: Record<Key, string> = {
   queueEmpty: "The queue is empty.",
   inviteHeadline: "Got a question?",
   scanToAsk: "Scan or open this address",
+  wifiName: "Wi-Fi: {name}",
   shortcuts: "j/k — select · enter — answer now · n — done, next · x — hide · p — projector",
 };
 

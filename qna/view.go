@@ -27,6 +27,7 @@ type View struct {
 	JoinURL     string         `json:"joinUrl,omitempty"`   // filled by server
 	Connected   int            `json:"connected,omitempty"` // host view only, filled by server
 	Public      bool           `json:"public,omitempty"`    // filled by server
+	Wifi        string         `json:"wifi,omitempty"`      // -wifi flag, filled by server
 }
 
 // View returns a snapshot for one device. host=true includes hidden questions.

@@ -50,6 +50,7 @@ body.is-projector .projector { display: flex; }
 .pj-next-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pj-join { display: flex; align-items: center; gap: 1.5vw; }
 .pj-qr { width: 160px; height: 160px; image-rendering: pixelated; }
+.pj-wifi-small { margin: .5vh 0 0; font-size: clamp(.9rem, 1.2vw, 1.4rem); color: var(--muted); }
 .pj-url-small { margin: 0; font-size: clamp(1rem, 1.5vw, 1.8rem); font-weight: 600; }
 
 /* nothing highlighted: a full-screen invitation */
@@ -66,6 +67,7 @@ body.is-projector .projector { display: flex; }
 .pj-qr-big { width: 40vh; height: 40vh; image-rendering: pixelated; }
 .pj-scan { margin: 0; font-size: clamp(1rem, 1.6vw, 1.75rem); color: var(--muted); }
 .pj-url { margin: 0; font-size: clamp(1.75rem, 3.2vw, 3.5rem); font-weight: 600; overflow-wrap: anywhere; }
+.pj-wifi { margin: 0; font-size: clamp(1.25rem, 2vw, 2.25rem); color: var(--muted); }
 
 /* presenter controls: shown while the mouse or keyboard is in use, hidden
    when idle so the room never sees them */

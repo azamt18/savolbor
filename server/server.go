@@ -25,6 +25,7 @@ type Config struct {
 	Static   fs.FS            // built pages: index.html, host.html, assets/
 	Now      func() time.Time // export date; defaults to time.Now
 	Public   bool             // reachable from the internet: loopback no longer implies host
+	Wifi     string           // wi-fi name to show next to the qr; empty = not shown
 }
 
 type Server struct {

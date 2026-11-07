@@ -85,3 +85,15 @@ describe("controls", () => {
     expect(screen.queryByRole("button", { name: /^hide/i })).toBeNull();
   });
 });
+
+test("wifi name shows under the qr on the invite and on the strip, only when set", () => {
+  const { unmount } = render(<Projector view={view([q()], { wifi: "Hotel Guest" })} />);
+  expect(screen.getByText("Wi-Fi: Hotel Guest")).toBeTruthy();
+  unmount();
+  const now = q({ text: "now one" });
+  const { unmount: u2 } = render(<Projector view={view([now], { highlighted: now.id, wifi: "Hotel Guest" })} />);
+  expect(screen.getByText("Wi-Fi: Hotel Guest")).toBeTruthy();
+  u2();
+  render(<Projector view={view([q()])} />);
+  expect(screen.queryByText(/Wi-Fi/)).toBeNull();
+});

@@ -38,6 +38,7 @@ func run() error {
 	data := flag.String("data", "savolbor-"+time.Now().Format("2006-01-02")+".jsonl", "event log file")
 	debug := flag.Bool("debug", false, "log every request (use when phones can't connect)")
 	publicURL := flag.String("public-url", "", "public tunnel url (e.g. https://x.trycloudflare.com); presenter then always needs the key")
+	wifi := flag.String("wifi", "", "wi-fi name to show under the qr, so phones on mobile data notice")
 	flag.Parse()
 	if *debug {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
@@ -81,7 +82,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static, Public: public})
+	app := server.New(server.Config{Board: board, AdminKey: adminKey, JoinURL: joinURL, Static: static, Public: public, Wifi: *wifi})
 	var handler http.Handler = app
 	if *debug {
 		handler = logRequests(handler)
@@ -104,7 +105,7 @@ func run() error {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all, public)
+	printBanner(restored, *data, joinURL, *port, adminKey, ifaces, all, public, *wifi)
 	if *debug {
 		fmt.Println("  debug: logging every request. no log line when a phone connects = it never reached this laptop")
 		fmt.Println()
@@ -136,7 +137,7 @@ func run() error {
 	return srv.Shutdown(ctx)
 }
 
-func printBanner(restored int, data, joinURL string, port int, adminKey string, ifaces []ifaceAddrs, all []net.IP, public bool) {
+func printBanner(restored int, data, joinURL string, port int, adminKey string, ifaces []ifaceAddrs, all []net.IP, public bool, wifi string) {
 	fmt.Printf("savolbor is running — %d questions restored from %s\n\n", restored, data)
 	fmt.Printf("  participants:      %s\n", joinURL)
 	if public {
@@ -144,7 +145,9 @@ func printBanner(restored int, data, joinURL string, port int, adminKey string, 
 	} else {
 		fmt.Printf("  presenter:         http://localhost:%d/host\n", port)
 	}
-	fmt.Printf("  presenter (phone): %s/host?key=%s\n\n", joinURL, adminKey)
+	fmt.Printf("  presenter (phone): %s/host?key=%s\n", joinURL, adminKey)
+	fmt.Print(wifiLine(wifi))
+	fmt.Println()
 	if qr, err := qrcode.New(joinURL, qrcode.Medium); err == nil {
 		fmt.Println(qr.ToSmallString(false))
 	}
@@ -162,4 +165,12 @@ func printBanner(restored int, data, joinURL string, port int, adminKey string, 
 		}
 		fmt.Printf("  other addresses: %s\n", strings.Join(others, ", "))
 	}
+}
+
+// wifiLine is the banner line naming the wi-fi phones must join; empty when -wifi is not set.
+func wifiLine(ssid string) string {
+	if ssid == "" {
+		return ""
+	}
+	return fmt.Sprintf("  wi-fi:            %s\n", ssid)
 }

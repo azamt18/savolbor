@@ -103,3 +103,16 @@ func TestTitleAndNextRoutesRequireHost(t *testing.T) {
 		t.Fatalf("next on empty queue: %d %s", w.Code, w.Body)
 	}
 }
+
+func TestWifiInSnapshot(t *testing.T) {
+	e := newEnv(t)
+	if v := hostView(t, e, "/api/view"); v.Wifi != "" {
+		t.Fatalf("wifi %q without the flag", v.Wifi)
+	}
+	b := qna.NewBoard(func(qna.Event) error { return nil }, time.Now)
+	w := &env{board: b, h: New(Config{Board: b, AdminKey: adminKey, Wifi: "Hotel Guest",
+		JoinURL: "http://192.168.1.5:8080", Static: fs.FS(fstest.MapFS{})})}
+	if v := hostView(t, w, "/api/view"); v.Wifi != "Hotel Guest" {
+		t.Fatalf("wifi %q, want Hotel Guest", v.Wifi)
+	}
+}
