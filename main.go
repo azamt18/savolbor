@@ -33,6 +33,7 @@ type options struct {
 	publicURL string
 	wifi      string
 	noOpen    bool
+	demo      bool
 }
 
 func parseOptions(args []string) (*options, error) {
@@ -44,8 +45,14 @@ func parseOptions(args []string) (*options, error) {
 	fs.StringVar(&o.publicURL, "public-url", "", "public tunnel url (e.g. https://x.trycloudflare.com); presenter then always needs the key")
 	fs.StringVar(&o.wifi, "wifi", "", "wi-fi name to show under the qr, so phones on mobile data notice")
 	fs.BoolVar(&o.noOpen, "no-open", false, "do not open the presenter page in the browser on start")
+	fs.BoolVar(&o.demo, "demo", false, "start with sample questions in a throwaway log, to try it out")
 	if err := fs.Parse(args); err != nil {
 		return nil, err
+	}
+	dataSet := false
+	fs.Visit(func(f *flag.Flag) { dataSet = dataSet || f.Name == "data" })
+	if o.demo && !dataSet {
+		o.data = demoLog()
 	}
 	return o, nil
 }
@@ -69,6 +76,9 @@ func run() error {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
+	if o.demo && o.data == demoLog() {
+		os.Remove(o.data) // the demo starts fresh every time
+	}
 	log, events, err := store.Open(o.data)
 	if err != nil {
 		return fmt.Errorf("open data file: %w", err)
@@ -78,6 +88,11 @@ func run() error {
 	for _, e := range events {
 		if err := board.Apply(e); err != nil {
 			slog.Warn("skipping event on replay", "type", e.Type, "qid", e.QID, "err", err)
+		}
+	}
+	if o.demo && len(events) == 0 {
+		if err := seedDemo(board); err != nil {
+			return fmt.Errorf("demo questions: %w", err)
 		}
 	}
 	restored := len(board.View("", true).Questions)

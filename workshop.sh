@@ -3,6 +3,8 @@
 #
 #   ./workshop.sh            lan only (phones on the same wi-fi)
 #   ./workshop.sh --public   also open a cloudflare quick tunnel and use its url
+#   ./workshop.sh --demo     start with sample questions in a throwaway log
+#                            (combines with --public)
 #
 # ctrl+c stops savolbor and the tunnel. today's questions stay in
 # ~/savolbor-YYYY-MM-DD.jsonl, so running it again the same day restores them.
@@ -12,7 +14,14 @@ cd "$(dirname "$0")"
 PORT="${PORT:-8080}"
 DATA="${DATA:-$HOME/savolbor-$(date +%F).jsonl}"
 PUBLIC=0
-[[ "${1:-}" == "--public" ]] && PUBLIC=1
+DEMO=0
+for a in "$@"; do
+  case "$a" in
+    --public) PUBLIC=1 ;;
+    --demo) DEMO=1 ;;
+    *) echo "unknown option $a (use --public, --demo)" >&2; exit 1 ;;
+  esac
+done
 
 # from a source checkout: build (the ui only when node is around, web/dist is
 # committed). from a release zip (no go.mod): use the savolbor next to this script.
@@ -49,7 +58,8 @@ if lsof -ti "tcp:$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   exit 1
 fi
 
-args=(-port "$PORT" -data "$DATA")
+args=(-port "$PORT")
+if [[ $DEMO == 1 ]]; then args+=(-demo); else args+=(-data "$DATA"); fi
 
 if [[ $PUBLIC == 1 ]]; then
   cf="$(cloudflared_bin)" || exit 1

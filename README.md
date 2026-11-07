@@ -23,6 +23,8 @@ next time, the files are already there:
 cd ~/Downloads/savolbor-darwin-arm64 && ./workshop.sh --public
 ```
 
+to try it first with sample questions (a plov cooking class, separate from your real questions and fresh every time): `./workshop.sh --public --demo`.
+
 same wi-fi only, no public link: run `./workshop.sh` without `--public`. the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect.
 
 </details>
@@ -44,6 +46,8 @@ next time, the files are already there:
 cd ~/Downloads/savolbor-darwin-amd64 && ./workshop.sh --public
 ```
 
+to try it first with sample questions (a plov cooking class, separate from your real questions and fresh every time): `./workshop.sh --public --demo`.
+
 same wi-fi only, no public link: run `./workshop.sh` without `--public`. the first start asks whether to accept incoming connections: choose **allow**, otherwise phones can't connect.
 
 </details>
@@ -62,6 +66,8 @@ wait for a line with `https://….trycloudflare.com` and copy that address. keep
 ```powershell
 cd $HOME\Downloads\savolbor-windows-amd64; .\savolbor.exe -public-url https://your-address.trycloudflare.com
 ```
+
+to try it first with sample questions (a plov cooking class, separate from your real questions and fresh every time), add `-demo`: `.\savolbor.exe -demo -public-url https://your-address.trycloudflare.com`.
 
 next time, skip the downloads. window 1: `cd $HOME\Downloads\savolbor-windows-amd64; .\cloudflared.exe tunnel --url http://localhost:8080`, window 2: as above, with the new address.
 
@@ -85,6 +91,8 @@ next time, the files are already there:
 ```bash
 cd ~/Downloads/savolbor-linux-amd64 && ./workshop.sh --public
 ```
+
+to try it first with sample questions (a plov cooking class, separate from your real questions and fresh every time): `./workshop.sh --public --demo`.
 
 same wi-fi only, no public link: run `./workshop.sh` without `--public`.
 
@@ -123,6 +131,7 @@ make build      # npm ci + vite build into web/dist, then go build
 ```bash
 ./workshop.sh            # build + start, phones on the same wi-fi
 ./workshop.sh --public   # build + cloudflare tunnel + start with the tunnel url
+./workshop.sh --demo     # sample questions in a throwaway log (also with --public)
 ```
 
 ctrl+c stops everything. `PORT=8081 ./workshop.sh` picks another port; data goes to `~/savolbor-YYYY-MM-DD.jsonl` (override with `DATA=…`).
@@ -154,6 +163,7 @@ tips:
 | `-public-url` | — | public tunnel url; join url/qr use it and the presenter always needs the key |
 | `-wifi` | — | wi-fi name shown in the terminal, under the qr on the projector and in the full-screen qr, so phones on mobile data notice |
 | `-no-open` | off | don't open the presenter page in the browser on start (otherwise `open` / `xdg-open` / `rundll32` is used; with `-public-url` the `?key=` link opens) |
+| `-demo` | off | start with sample questions (a plov cooking class) in a throwaway log in the temp folder, fresh on every run; `-data` overrides the file |
 | `-debug` | off | log every request — if a phone connects and no line appears, its request never reached the laptop |
 
 ## over the internet (when the lan is blocked)
