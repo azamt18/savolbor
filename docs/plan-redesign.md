@@ -8,6 +8,8 @@
 
 **Tech Stack:** go 1.26 (existing), react 18 + react-dom, typescript, vite, vitest + @testing-library/react + jsdom (dev only), onest font (ofl) embedded as woff2.
 
+**Status (2026-11-07):** tasks 1–7 done on `feat/savolbor`; deviations are listed under [as built](#as-built).
+
 **Spec:** [spec.md](spec.md) — see "ui redesign (2026-11-07)". builds on the as-built state described in [plan.md](plan.md).
 
 ## Global Constraints
@@ -266,3 +268,16 @@ products/savolbor/
 - [ ] **Step 2: run** `make test && make build` → PASS.
 - [ ] **Step 3: end-to-end** — real phone on the same wi-fi: scan, post, vote, edit, delete, language toggle, dark mode; laptop: title, done-next through 3 questions to the invite screen, hide/unhide, export; kill the server mid-session and restart → phones show offline after 5s, then recover on their own.
 - [ ] **Step 4: commit** — `chore(savolbor): remove vanilla ui and update docs`.
+
+---
+
+## as built
+
+decisions taken during execution that differ from the text above:
+
+- **contrast:** light `--muted` is `#646D82` (the plan's `#6B7489` is 4.41:1 on `--paper`); the voted pill uses dark text on firuza (white is 3.30:1).
+- **liveness:** on sse, "offline" means the stream is closed for 5s — a quiet stream only carries pings, which never reach `onmessage`. once a page falls back to polling it stays polling until reload.
+- **connected count:** a participant's first poll also refreshes host streams, so polling-only rooms update the count.
+- **now strip (phone):** tapping expands the clamped text; the highlighted question has no row in the list to scroll to.
+- **`TestServesBuiltPages`** lives in `dist_test.go` (root package), so `server` tests don't depend on a build.
+- **fonts** come from `@fontsource/onest` (latin + latin-ext, 400/600 only).

@@ -47,7 +47,7 @@ this softens "lan only" — internet use is an opt-in escape hatch, off by defau
 
 ## ui redesign (2026-11-07)
 
-decided after reviewing screenshots of the first ui ("works, but looks like a default dark admin template"). implementation plan: [plan-redesign.md](plan-redesign.md).
+decided after reviewing screenshots of the first ui ("works, but looks like a default dark admin template"). implementation plan: [plan-redesign.md](plan-redesign.md) — built 2026-11-07.
 
 | area | decision |
 |---|---|

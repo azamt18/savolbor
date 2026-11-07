@@ -8,7 +8,13 @@ live q&a for workshops, lessons and seminars. participants send and upvote quest
 go build -o savolbor .
 ```
 
-one binary, the web pages are embedded. go 1.26.
+one binary, the web pages are embedded. go 1.26. the built ui (`web/dist`) is committed, so this needs no node.
+
+after changing the ui (`ui/`, react + typescript + vite), rebuild it and the binary — needs node 20+:
+
+```bash
+make build      # npm ci + vite build into web/dist, then go build
+```
 
 ## run in a room
 
@@ -48,7 +54,7 @@ cloudflared tunnel --url http://localhost:8080      # prints https://<random>.tr
 
 - in public mode the laptop is **not** trusted automatically: open the `presenter` link with `?key=` printed at startup.
 - requests that arrive through any proxy (`x-forwarded-for`, `cf-connecting-ip`, …) never count as the presenter, even without `-public-url`.
-- some networks (corporate tls inspection) hold the live stream back; pages notice within 4s and switch to polling `/api/view` every 2s.
+- some networks (corporate tls inspection) hold the live stream back; pages notice within 4s and switch to polling `/api/view` every 2s. in public mode they poll from the start.
 - anyone with the url can post. stop the tunnel (ctrl+c) when the session ends. check your company's policy before tunnelling from a work laptop.
 
 ## data and export
@@ -63,10 +69,22 @@ cloudflared tunnel --url http://localhost:8080      # prints https://<random>.tr
 - authors can edit their own question until it is marked answered, and delete it at any time.
 - hidden questions disappear from participants' phones.
 
+## presenter page
+
+- **session title** at the top: shown on phones and the projector. saves on enter or when you click away.
+- **done, next** marks the current question answered and puts the top-voted open one on screen. after the last one the projector switches to the qr invite.
+- **connected** counts phones with the page open.
+- keys: `j`/`k` select, `enter` answer now, `n` done, next, `x` hide, `p` projector, `esc` leave the projector. keys do nothing while you type in a field.
+- tabs **queue / answered / hidden** let you undo: mark unanswered, unhide.
+
 ## develop
 
 ```bash
-go test -race ./...
-go vet ./...
-go run . -port 8081 -data dev.jsonl
+make test                    # go test -race, go vet, ui tests (vitest)
+go run . -debug              # api + embedded pages on :8080
+npm --prefix ui run dev      # live-reloading pages on :5173, api proxied to :8080
 ```
+
+through the vite dev server, open `/host?key=<key printed by go run>` — the proxy adds forwarding headers, so localhost isn't trusted as the presenter there.
+
+layout: `ui/src/participant` (phone page), `ui/src/host` (presenter + projector), `ui/src/useBoard.ts` (live connection, sse with polling fallback), `ui/src/select.ts` (list rules shared by all views).
